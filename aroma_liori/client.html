@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>הדף שלי | מירית ארומתרפיה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Assistant:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #3B1F08;
+      --gold: #D4A85A;
+      --sand: #E8D9C0;
+      --text: #F5EDE0;
+      --text-mid: #D4C0A4;
+      --text-dim: #A08868;
+      --card: rgba(40,18,4,0.5);
+      --border: rgba(232,217,192,0.15);
+      --amber: #C8843C;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Assistant', sans-serif;
+      font-weight: 300;
+      direction: rtl;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 60% 55% at 72% 20%, #C87820 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 20% 75%, #7A3C10 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 50% 50%, #A05818 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 85% 85%, #8B4A14 0%, transparent 50%),
+        radial-gradient(ellipse 45% 40% at 10% 15%, #6B3410 0%, transparent 50%),
+        #7A3E14;
+      background-attachment: fixed;
+    }
+
+    /* ── LOADING ── */
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 16px;
+      background: rgba(30,12,2,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 2px solid rgba(212,168,90,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading p { color: var(--text-mid); font-size: 0.88rem; letter-spacing: 0.1em; }
+
+    /* ── ERROR / NOT FOUND ── */
+    #error-screen {
+      display: none;
+      min-height: 100vh;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 40px;
+      flex-direction: column; gap: 16px;
+    }
+    #error-screen h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-weight: 300;
+      color: var(--sand);
+    }
+    #error-screen p { color: var(--text-mid); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top:0; right:0; left:0;
+      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 40px;
+      background: rgba(30,12,2,0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 300;
+      color: var(--sand); text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+    .nav-client-name {
+      font-size: 0.84rem; color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── MAIN ── */
+    main {
+      display: none;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 100px 24px 60px;
+    }
+
+    /* ── HERO GREETING ── */
+    .greeting {
+      text-align: center;
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.1s forwards;
+    }
+    .greeting-eyebrow {
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.24em; color: var(--amber);
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .greeting h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 3.6rem);
+      font-weight: 300; line-height: 1.2;
+      color: var(--text);
+    }
+    .greeting h1 em { font-style: italic; color: var(--gold); }
+    .greeting-note {
+      margin-top: 14px;
+      font-size: 0.94rem; color: var(--text-mid);
+      line-height: 1.8;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-label {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.22em; color: var(--amber);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    /* ── OIL CARDS ── */
+    .oils-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 56px; }
+
+    .oil-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 32px;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      animation: fadeUp 0.7s ease forwards;
+    }
+
+    .oil-card-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; margin-bottom: 16px;
+    }
+    .oil-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 400;
+      color: var(--text);
+    }
+    .oil-date { font-size: 0.76rem; color: var(--text-dim); margin-top: 4px; }
+
+    .oil-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .oil-meta-item label {
+      display: block; font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.18em; color: var(--amber);
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .oil-meta-item p { font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; }
+
+    .oil-instructions {
+      background: rgba(212,168,90,0.06);
+      border-right: 2px solid var(--gold);
+      padding: 12px 16px;
+      border-radius: 0 4px 4px 0;
+    }
+    .oil-instructions label {
+      display: block; font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.18em; color: var(--gold);
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .oil-instructions p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.75; }
+
+    /* ── PROGRESS ── */
+    .progress-section { margin-bottom: 56px; }
+
+    .progress-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+
+    .progress-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 18px 24px;
+      display: flex; gap: 16px; align-items: flex-start;
+      opacity: 0; animation: fadeUp 0.6s ease forwards;
+    }
+
+    .progress-feeling {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(212,168,90,0.12);
+      border: 1px solid rgba(212,168,90,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+
+    .progress-body { flex: 1; }
+    .progress-text { font-size: 0.92rem; color: var(--text-mid); line-height: 1.7; margin-bottom: 6px; }
+    .progress-meta { font-size: 0.72rem; color: var(--text-dim); }
+
+    .empty-state {
+      text-align: center; padding: 32px;
+      color: var(--text-dim); font-size: 0.9rem;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+    }
+
+    /* ── ADD UPDATE FORM ── */
+    .add-update {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 32px;
+      backdrop-filter: blur(4px);
+    }
+    .add-update h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem; font-weight: 400;
+      color: var(--text); margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.18em; color: var(--amber);
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      background: rgba(30,12,2,0.5);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 300;
+      resize: vertical;
+      transition: border-color 0.2s;
+      direction: rtl;
+    }
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: rgba(212,168,90,0.5);
+    }
+    .form-group textarea { min-height: 90px; }
+
+    /* feeling selector */
+    .feeling-row {
+      display: flex; gap: 10px;
+    }
+    .feeling-btn {
+      flex: 1;
+      background: rgba(30,12,2,0.4);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px 4px;
+      color: var(--text-mid);
+      font-size: 1.2rem;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .feeling-btn:hover { background: rgba(212,168,90,0.1); }
+    .feeling-btn.selected {
+      background: rgba(212,168,90,0.15);
+      border-color: rgba(212,168,90,0.5);
+    }
+    .feeling-btn span { display: block; font-size: 0.62rem; color: var(--text-dim); margin-top: 4px; letter-spacing: 0.05em; }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--gold);
+      color: #3B1F08;
+      border: none;
+      padding: 14px;
+      border-radius: 4px;
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.9rem; font-weight: 600;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .btn-submit:hover { background: var(--sand); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .success-msg {
+      display: none;
+      text-align: center; padding: 14px;
+      background: rgba(212,168,90,0.1);
+      border: 1px solid rgba(212,168,90,0.3);
+      border-radius: 4px;
+      color: var(--gold); font-size: 0.88rem;
+      margin-top: 12px;
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 18px; }
+      main { padding: 90px 16px 40px; }
+      .oil-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>טוענת את הדף שלך...</p>
+</div>
+
+<div id="error-screen">
+  <h2>הדף לא נמצא</h2>
+  <p>הקישור שגוי או פג תוקפו. פני למירית לקבלת קישור חדש.</p>
+</div>
+
+<nav>
+  <a class="nav-logo" href="index.html">מירית | ארומתרפיה</a>
+  <span class="nav-client-name" id="nav-name"></span>
+</nav>
+
+<main id="main-content">
+
+  <div class="greeting">
+    <p class="greeting-eyebrow">הדף האישי שלך</p>
+    <h1>שלום, <em id="client-name-title">...</em></h1>
+    <p class="greeting-note" id="client-notes"></p>
+  </div>
+
+  <!-- OILS -->
+  <p class="section-label">השמנים שרוקחו עבורך</p>
+  <div class="oils-list" id="oils-list"></div>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <p class="section-label">יומן ההתקדמות שלך</p>
+    <div class="progress-list" id="progress-list"></div>
+
+    <!-- ADD UPDATE -->
+    <div class="add-update">
+      <h3>הוסיפי עדכון חדש</h3>
+
+      <div class="form-group">
+        <label>שמן (אופציונלי)</label>
+        <select id="oil-select">
+          <option value="">— כללי, לא קשור לשמן מסוים —</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>איך את מרגישה?</label>
+        <div class="feeling-row" id="feeling-row">
+          <button class="feeling-btn" data-val="1">😔<span>קשה</span></button>
+          <button class="feeling-btn" data-val="2">😐<span>ככה ככה</span></button>
+          <button class="feeling-btn" data-val="3">🙂<span>בסדר</span></button>
+          <button class="feeling-btn" data-val="4">😊<span>טוב</span></button>
+          <button class="feeling-btn" data-val="5">🌟<span>מצוין!</span></button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>מה קורה? ספרי קצת</label>
+        <textarea id="update-text" placeholder="כאן את יכולה לכתוב הכל — שינויים שהרגשת, תצפיות, שאלות למירית..."></textarea>
+      </div>
+
+      <button class="btn-submit" id="submit-btn" onclick="submitUpdate()">שלחי עדכון למירית</button>
+      <div class="success-msg" id="success-msg">✓ העדכון נשמר! מירית תראה אותו בקרוב.</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SUPABASE_URL = 'https://ulkeegjpsvipbsltbelu.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_vvKFtWu8WB94csfEt5UhnA_mYKu0AeA';
+
+  let clientId = null;
+  let selectedFeeling = null;
+
+  async function api(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        ...options.headers
+      },
+      ...options
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const text = await res.text();
+    return text ? JSON.parse(text) : [];
+  }
+
+  function getToken() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('t') || params.get('token');
+  }
+
+  function formatDate(iso) {
+    return new Date(iso).toLocaleDateString('he-IL', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  function feelingEmoji(n) {
+    return ['😔','😐','🙂','😊','🌟'][n-1] || '•';
+  }
+
+  async function loadPage() {
+    const token = getToken();
+    if (!token) { showError(); return; }
+
+    try {
+      // load client
+      const clients = await api(`clients?token=eq.${encodeURIComponent(token)}&select=*`);
+      if (!clients.length) { showError(); return; }
+      const client = clients[0];
+      clientId = client.id;
+
+      // set names
+      document.getElementById('client-name-title').textContent = client.name;
+      document.getElementById('nav-name').textContent = client.name;
+      if (client.notes) {
+        document.getElementById('client-notes').textContent = client.notes;
+      }
+
+      // load oils
+      const oils = await api(`oils?client_id=eq.${clientId}&select=*&order=created_at.asc`);
+      renderOils(oils);
+
+      // populate oil select
+      const sel = document.getElementById('oil-select');
+      oils.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.id;
+        opt.textContent = o.name;
+        sel.appendChild(opt);
+      });
+
+      // load progress
+      const progress = await api(`progress_updates?client_id=eq.${clientId}&select=*,oils(name)&order=created_at.desc`);
+      renderProgress(progress);
+
+      // show page
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+
+    } catch(e) {
+      console.error(e);
+      showError();
+    }
+  }
+
+  function renderOils(oils) {
+    const el = document.getElementById('oils-list');
+    if (!oils.length) {
+      el.innerHTML = '<div class="empty-state">עדיין לא רוקחו שמנים עבורך</div>';
+      return;
+    }
+    el.innerHTML = oils.map((o, i) => `
+      <div class="oil-card" style="animation-delay:${i * 0.1}s">
+        <div class="oil-card-header">
+          <div>
+            <div class="oil-name">${o.name}</div>
+            <div class="oil-date">${formatDate(o.created_at)}</div>
+          </div>
+        </div>
+        <div class="oil-meta">
+          ${o.ingredients ? `
+          <div class="oil-meta-item">
+            <label>רכיבים</label>
+            <p>${o.ingredients}</p>
+          </div>` : ''}
+          ${o.purpose ? `
+          <div class="oil-meta-item">
+            <label>מטרה</label>
+            <p>${o.purpose}</p>
+          </div>` : ''}
+        </div>
+        ${o.instructions ? `
+        <div class="oil-instructions">
+          <label>הוראות שימוש</label>
+          <p>${o.instructions}</p>
+        </div>` : ''}
+      </div>
+    `).join('');
+  }
+
+  function renderProgress(items) {
+    const el = document.getElementById('progress-list');
+    if (!items.length) {
+      el.innerHTML = '<div class="empty-state">עדיין אין עדכונים — הוסיפי את הראשון!</div>';
+      return;
+    }
+    el.innerHTML = items.map((p, i) => `
+      <div class="progress-item" style="animation-delay:${i * 0.08}s">
+        <div class="progress-feeling">${p.feeling ? feelingEmoji(p.feeling) : '•'}</div>
+        <div class="progress-body">
+          <div class="progress-text">${p.update_text}</div>
+          <div class="progress-meta">
+            ${p.oils ? `${p.oils.name} · ` : ''}${formatDate(p.created_at)}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // feeling buttons
+  document.getElementById('feeling-row').addEventListener('click', e => {
+    const btn = e.target.closest('.feeling-btn');
+    if (!btn) return;
+    document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedFeeling = parseInt(btn.dataset.val);
+  });
+
+  async function submitUpdate() {
+    const text = document.getElementById('update-text').value.trim();
+    if (!text) { alert('כתבי משהו לפני שליחה 🙂'); return; }
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'שולחת...';
+
+    const oilId = document.getElementById('oil-select').value || null;
+
+    try {
+      await api('progress_updates', {
+        method: 'POST',
+        body: JSON.stringify({
+          client_id: clientId,
+          oil_id: oilId,
+          update_text: text,
+          feeling: selectedFeeling
+        })
+      });
+
+      document.getElementById('update-text').value = '';
+      document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('selected'));
+      selectedFeeling = null;
+
+      document.getElementById('success-msg').style.display = 'block';
+      setTimeout(() => document.getElementById('success-msg').style.display = 'none', 4000);
+
+      // reload progress
+      const progress = await api(`progress_updates?client_id=eq.${clientId}&select=*,oils(name)&order=created_at.desc`);
+      renderProgress(progress);
+
+    } catch(e) {
+      alert('שגיאה בשמירה, נסי שוב');
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'שלחי עדכון למירית';
+    }
+  }
+
+  function showError() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'flex';
+  }
+
+  loadPage();
+</script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>מירית | ארומתרפיה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Assistant:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep:    #3B1F08;
+      --sand:       #E8D9C0;
+      --terracotta: #D4956A;
+      --amber:      #C8843C;
+      --gold:       #D4A85A;
+      --text-light: #F5EDE0;
+      --text-mid:   #D4C0A4;
+      --text-dim:   #A08868;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      color: var(--text-light);
+      font-family: 'Assistant', sans-serif;
+      font-weight: 300;
+      direction: rtl;
+      text-align: right;
+      /* painterly warm background — varied, not flat */
+      background:
+        radial-gradient(ellipse 60% 55% at 72% 20%, #C87820 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 20% 75%, #7A3C10 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 50% 50%, #A05818 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 85% 85%, #8B4A14 0%, transparent 50%),
+        radial-gradient(ellipse 45% 40% at 10% 15%, #6B3410 0%, transparent 50%),
+        #7A3E14;
+      background-attachment: fixed;
+    }
+
+    /* ══ NAV ══ */
+    nav {
+      position: fixed;
+      top: 0; right: 0; left: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 56px;
+      background: rgba(50, 25, 6, 0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(232,217,192,0.12);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--sand);
+      letter-spacing: 0.06em;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 0.88rem; font-weight: 400;
+      color: var(--text-mid);
+      text-decoration: none; letter-spacing: 0.1em;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ══ HERO ══ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+    }
+
+    /* ── arc circle ── */
+    .arc-wrap {
+      position: relative;
+      width: 320px; height: 320px;
+      margin: 0 auto 36px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .arc-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      overflow: visible;
+    }
+
+    .arc-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      fill: #F0DFC0;
+    }
+
+    .photo-circle {
+      position: absolute;
+      /* centered: (320 - 196) / 2 = 62px from each side */
+      top: 62px; left: 62px;
+      width: 196px; height: 196px;
+      border-radius: 50%;
+      background: rgba(60,30,8,0.6);
+      border: 1.5px solid rgba(232,217,192,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+
+    .photo-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .photo-circle svg { width: 40px; height: 40px; opacity: 0.5; }
+    .photo-circle span { font-size: 0.65rem; color: var(--text-mid); letter-spacing: 0.1em; }
+
+    /* ── hero text ── */
+    .hero-eyebrow {
+      font-size: 0.76rem; font-weight: 600;
+      letter-spacing: 0.26em;
+      color: rgba(240,223,192,0.75);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.15s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 6.5vw, 5.4rem);
+      font-weight: 300;
+      line-height: 1.18;
+      color: var(--text-light);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.55s forwards;
+    }
+    .hero-title em { font-style: italic; color: #F5E0B0; }
+
+    .hero-subtitle {
+      font-size: 1rem; font-weight: 300;
+      line-height: 1.9;
+      color: var(--text-mid);
+      max-width: 500px;
+      margin: 0 auto 44px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.72s forwards;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      font-size: 0.86rem; font-weight: 600;
+      letter-spacing: 0.14em;
+      color: #3B1F08;
+      background: #E8C880;
+      padding: 14px 40px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.88s forwards;
+    }
+    .btn-primary:hover { background: var(--sand); transform: translateY(-2px); }
+
+    /* ══ DIVIDER ══ */
+    .divider {
+      text-align: center; padding: 20px 0;
+      color: rgba(240,223,192,0.4);
+      font-size: 1.1rem; letter-spacing: 0.5em;
+    }
+
+    /* ══ ABOUT TEASER ══ */
+    .about-teaser {
+      padding: 90px 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 72px;
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(40,18,4,0.25);
+      backdrop-filter: blur(2px);
+    }
+
+    .about-img-block { flex-shrink: 0; position: relative; }
+
+    .about-photo-placeholder {
+      width: 300px; height: 380px;
+      background: rgba(40,18,4,0.35);
+      border-radius: 4px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 12px;
+      border: 1px solid rgba(232,217,192,0.18);
+      backdrop-filter: blur(4px);
+    }
+    .about-photo-placeholder svg { width: 48px; height: 48px; opacity: 0.4; }
+    .about-photo-placeholder span { font-size: 0.76rem; color: var(--text-mid); letter-spacing: 0.1em; }
+
+    .about-img-block::before {
+      content: '';
+      position: absolute;
+      top: 16px; right: -16px;
+      width: 100%; height: 100%;
+      border: 1px solid rgba(232,217,192,0.15);
+      border-radius: 4px;
+      z-index: -1;
+    }
+
+    .about-text { max-width: 460px; }
+
+    .section-eyebrow {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.24em;
+      color: rgba(240,223,192,0.7);
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      font-weight: 300; line-height: 1.25;
+      color: var(--text-light); margin-bottom: 22px;
+    }
+    .section-title em { font-style: italic; color: #F5E0B0; }
+
+    .section-body {
+      font-size: 0.98rem; font-weight: 300;
+      line-height: 1.95; color: var(--text-mid);
+      margin-bottom: 32px;
+    }
+
+    .btn-outline {
+      display: inline-block;
+      font-size: 0.84rem; font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #E8C880;
+      border: 1.5px solid #E8C880;
+      padding: 12px 34px; border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-outline:hover { background: #E8C880; color: #3B1F08; }
+
+    /* ══ SERVICES ══ */
+    .services {
+      padding: 90px 40px; text-align: center;
+      background: rgba(30,12,2,0.3);
+      backdrop-filter: blur(3px);
+      border-top: 1px solid rgba(232,217,192,0.1);
+      border-bottom: 1px solid rgba(232,217,192,0.1);
+    }
+    .services-header { margin-bottom: 56px; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px; max-width: 1000px; margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(40,18,4,0.45);
+      border: 1px solid rgba(232,217,192,0.14);
+      border-radius: 4px; padding: 40px 28px;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      backdrop-filter: blur(4px);
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+      border-color: rgba(232,217,192,0.3);
+    }
+
+    .card-icon {
+      width: 50px; height: 50px;
+      margin: 0 auto 18px;
+      background: rgba(232,217,192,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-icon svg { width: 24px; height: 24px; }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.28rem; font-weight: 400;
+      color: var(--text-light); margin-bottom: 10px;
+    }
+    .card-body { font-size: 0.88rem; font-weight: 300; line-height: 1.8; color: var(--text-mid); }
+
+    /* ══ QUOTE ══ */
+    .quote-banner {
+      padding: 80px 40px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .quote-banner::before {
+      content: '"';
+      position: absolute; top: -60px; right: 40px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20rem;
+      color: rgba(232,217,192,0.06);
+      line-height: 1; pointer-events: none;
+    }
+
+    .quote-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+      font-weight: 300; font-style: italic;
+      color: var(--sand);
+      max-width: 680px; margin: 0 auto 18px;
+      line-height: 1.65;
+    }
+    .quote-attr { font-size: 0.78rem; letter-spacing: 0.2em; color: rgba(232,217,192,0.5); text-transform: uppercase; }
+
+    /* ══ CONTACT ══ */
+    .contact-teaser {
+      padding: 90px 40px; text-align: center;
+      background: rgba(30,12,2,0.25);
+    }
+    .contact-teaser .section-title { margin-bottom: 14px; }
+    .contact-teaser .section-body  { max-width: 440px; margin: 0 auto 38px; }
+
+    /* ══ FOOTER ══ */
+    footer {
+      background: rgba(20,8,2,0.7);
+      backdrop-filter: blur(8px);
+      color: rgba(232,217,192,0.5);
+      text-align: center; padding: 34px 40px;
+      font-size: 0.8rem; font-weight: 300;
+      letter-spacing: 0.07em; line-height: 2;
+      border-top: 1px solid rgba(232,217,192,0.1);
+    }
+    footer a { color: rgba(232,217,192,0.7); text-decoration: none; }
+    footer a:hover { color: var(--sand); }
+    footer .footer-credit { margin-top: 6px; font-size: 0.72rem; opacity: 0.4; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 860px) {
+      nav { padding: 18px 22px; }
+      .about-teaser { flex-direction: column; gap: 44px; }
+      .about-photo-placeholder { width: 100%; max-width: 300px; height: 300px; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="index.html">מירית</a>
+    <ul class="nav-links">
+      <li><a href="about.html">אודות</a></li>
+      <li><a href="#services">טיפולים</a></li>
+      <li><a href="#contact">צור קשר</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">ארומתרפיה · טיפול בשמנים טבעיים</p>
+
+    <!--
+      ARC WRAP: 320×320 container
+      Photo circle: 196×196, centered → offset 62px from each edge
+      
+      Arc geometry:
+        Circle center: (160, 160)
+        Photo radius: 98px
+        Outer ring radius: 148px  → text sits ~halfway between photo edge (98) and ring (148) → at r=123
+        
+      Top arc path: starts left of center, curves above, ends right
+        center (160,160), radius 123
+        left point:  160 - 123 = 37  → (37, 160)
+        right point: 160 + 123 = 283 → (283, 160)
+        "A 123,123 0 0,1" means sweep clockwise (over the top)
+
+      Bottom arc path: same radius, sweep counter-clockwise (under the bottom)
+        "A 123,123 0 0,0"
+    -->
+    <div class="arc-wrap">
+      <svg class="arc-svg" viewBox="0 0 320 320">
+        <defs>
+          <path id="topArc"
+            d="M 37,160 A 123,123 0 0,1 283,160"/>
+          <path id="bottomArc"
+            d="M 37,160 A 123,123 0 0,0 283,160"/>
+        </defs>
+
+        <!-- outer decorative ring -->
+        <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(232,217,192,0.2)" stroke-width="1"/>
+        <circle cx="160" cy="160" r="100" fill="none" stroke="rgba(232,217,192,0.1)" stroke-width="0.5"/>
+
+        <!-- top: convex text, reads above circle -->
+        <text class="arc-text">
+          <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+            ארומתרפיה · שמנים טבעיים
+          </textPath>
+        </text>
+
+        <!-- bottom: concave text, reads below circle -->
+        <text class="arc-text">
+          <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+            ריח שמחלים · מגע שמרפא
+          </textPath>
+        </text>
+      </svg>
+
+      <!-- photo placeholder, absolutely centered -->
+      <div class="photo-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" color="#D4956A">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span>תמונת מירית</span>
+      </div>
+    </div>
+
+    <h1 class="hero-title">ריח שמחלים,<br><em>מגע שמרפא</em></h1>
+    <p class="hero-subtitle">
+      מירית עוסקת בארומתרפיה ומאמינה בכוח הריפוי של הטבע.
+      כאן תמצאו חיבור בין שמנים אתריים, גוף ונפש.
+    </p>
+    <a class="btn-primary" href="#contact">לתיאום פגישה</a>
+  </section>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ABOUT TEASER -->
+  <section class="about-teaser">
+    <div class="about-img-block">
+      <div class="about-photo-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D4956A" stroke-width="1.2">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+        </svg>
+        <span>תמונה</span>
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="section-eyebrow">קצת עלי</p>
+      <h2 class="section-title">מירית —<br><em>ארומתרפיסטית</em></h2>
+      <p class="section-body">
+        מירית עוסקת בארומתרפיה ורוחשת כבוד עמוק לכוחות הריפוי של הטבע.
+        היא מאמינה שלכל אדם מגיעה נוכחות מלאה ואוהבת בתהליך הריפוי.
+      </p>
+      <a class="btn-outline" href="about.html">קראו עוד על מירית</a>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="services-header">
+      <p class="section-eyebrow">מה אני מציעה</p>
+      <h2 class="section-title">טיפולים ושירותים</h2>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4">
+            <path d="M12 2C8 8 5 12.5 5 15.5a7 7 0 0014 0C19 12.5 16 8 12 2z"/>
+          </svg>
+        </div>
+        <h3 class="card-title">שמנים מותאמים אישית</h3>
+        <p class="card-body">תיאור קצר של השירות יתווסף כאן.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4">
+            <path d="M12 22C6 22 3 17 3 12c0-6 6-10 9-10s9 4 9 10c0 5-3 10-9 10z"/>
+            <path d="M12 22V12M12 12C9 9 6 8 3 12"/>
+          </svg>
+        </div>
+        <h3 class="card-title">טיפול בצלקות ועור</h3>
+        <p class="card-body">תיאור קצר של השירות יתווסף כאן.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4">
+            <path d="M18 11V6a2 2 0 00-2-2v0a2 2 0 00-2 2v0M14 10V4a2 2 0 00-2-2v0a2 2 0 00-2 2v2M10 10.5V6a2 2 0 00-2-2v0a2 2 0 00-2 2v8a6 6 0 006 6h2a6 6 0 006-6v-3a2 2 0 00-2-2v0a2 2 0 00-2 2v0"/>
+          </svg>
+        </div>
+        <h3 class="card-title">הקלה על כאבים</h3>
+        <p class="card-body">תיאור קצר של השירות יתווסף כאן.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-banner">
+    <p class="quote-text">"הטבע הוא המרפא הגדול ביותר — השמנים הם השפה שלו"</p>
+    <p class="quote-attr">— מירית</p>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-teaser" id="contact">
+    <p class="section-eyebrow">בואו נדבר</p>
+    <h2 class="section-title">מוכנים <em>להתחיל?</em></h2>
+    <p class="section-body">אשמח לענות על כל שאלה ולתאם פגישת היכרות.</p>
+    <a class="btn-primary" href="mailto:mirit@example.com">שלחו הודעה</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 מירית | ארומתרפיה</p>
+    <p><a href="mailto:mirit@example.com">mirit@example.com</a></p>
+    <p class="footer-credit">האתר עוצב ונבנה ע"י ליאורה לוי — Sea++</p>
+  </footer>
+
+</body>
+</html>
