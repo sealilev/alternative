@@ -1,0 +1,292 @@
+/* ================================================
+   AROMA LIORI — Shared Stylesheet
+   ================================================ */
+
+/* ── VARIABLES ── */
+:root {
+  --bg-deep:    #3B1F08;
+  --bg-mid:     #2A1A0A;
+  --sand:       #E8D9C0;
+  --terracotta: #D4956A;
+  --amber:      #C8843C;
+  --gold:       #D4A85A;
+  --text-light: #F5EDE0;
+  --text-mid:   #D4C0A4;
+  --text-dim:   #A08868;
+  --card:       rgba(40,18,4,0.5);
+  --border:     rgba(232,217,192,0.15);
+  --green:      #5A9E6F;
+}
+
+/* ── RESET ── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* ── BODY ── */
+body {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 300;
+  direction: rtl;
+  text-align: right;
+  color: var(--text-light);
+  background:
+    radial-gradient(ellipse 60% 55% at 72% 20%, #C87820 0%, transparent 60%),
+    radial-gradient(ellipse 50% 45% at 20% 75%, #7A3C10 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 50%, #A05818 0%, transparent 65%),
+    radial-gradient(ellipse 40% 35% at 85% 85%, #8B4A14 0%, transparent 50%),
+    radial-gradient(ellipse 45% 40% at 10% 15%, #6B3410 0%, transparent 50%),
+    #7A3E14;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* ── GOOGLE FONTS (import in HTML head) ── */
+/* Cormorant Garamond + Assistant */
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; right: 0; left: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 56px;
+  background: rgba(30, 12, 2, 0.75);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--sand);
+  letter-spacing: 0.06em;
+  text-decoration: none;
+}
+
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a {
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--text-mid);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--gold); }
+
+/* ── TYPOGRAPHY ── */
+.section-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  color: var(--terracotta);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+  font-weight: 300;
+  line-height: 1.25;
+  color: var(--text-light);
+  margin-bottom: 22px;
+}
+.section-title em { font-style: italic; color: var(--gold); }
+
+.section-body {
+  font-size: 0.98rem;
+  font-weight: 300;
+  line-height: 1.95;
+  color: var(--text-mid);
+  margin-bottom: 32px;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--bg-deep);
+  background: var(--gold);
+  padding: 14px 40px;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+}
+.btn-primary:hover { background: var(--sand); transform: translateY(-2px); }
+
+.btn-outline {
+  display: inline-block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  border: 1.5px solid var(--gold);
+  padding: 12px 34px;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: background 0.3s, color 0.3s;
+}
+.btn-outline:hover { background: var(--gold); color: var(--bg-deep); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 40px 28px;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  backdrop-filter: blur(4px);
+}
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+  border-color: rgba(232,217,192,0.3);
+}
+
+.card-icon {
+  width: 50px; height: 50px;
+  margin: 0 auto 18px;
+  background: rgba(232,217,192,0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-icon svg { width: 24px; height: 24px; }
+
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.28rem;
+  font-weight: 400;
+  color: var(--text-light);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.card-body {
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: var(--text-mid);
+  text-align: center;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  text-align: center;
+  padding: 20px 0;
+  color: var(--terracotta);
+  font-size: 1.1rem;
+  opacity: 0.4;
+  letter-spacing: 0.5em;
+}
+
+/* ── FOOTER ── */
+footer {
+  background: rgba(15, 8, 2, 0.85);
+  backdrop-filter: blur(8px);
+  color: var(--text-dim);
+  text-align: center;
+  padding: 34px 40px;
+  font-size: 0.8rem;
+  font-weight: 300;
+  letter-spacing: 0.07em;
+  line-height: 2;
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--text-mid); text-decoration: none; }
+footer a:hover { color: var(--gold); }
+footer .footer-credit { margin-top: 6px; font-size: 0.72rem; opacity: 0.4; }
+
+/* ── PHOTO PLACEHOLDERS ── */
+.photo-placeholder {
+  background: rgba(40,18,4,0.5);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.photo-placeholder svg { width: 48px; height: 48px; opacity: 0.35; }
+.photo-placeholder span { font-size: 0.76rem; color: var(--text-dim); letter-spacing: 0.1em; }
+
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--amber);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  background: rgba(30,12,2,0.5);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  color: var(--text-light);
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  direction: rtl;
+  transition: border-color 0.2s;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: rgba(212,168,90,0.5);
+}
+.form-group textarea { min-height: 72px; resize: vertical; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 28px;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+}
+
+/* ── SAVE BUTTON ── */
+.btn-save {
+  background: var(--gold);
+  color: var(--bg-deep);
+  border: none;
+  padding: 11px 28px;
+  border-radius: 4px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-save:hover { background: var(--sand); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  nav { padding: 18px 22px; }
+}
