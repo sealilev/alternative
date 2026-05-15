@@ -523,20 +523,20 @@
         <div class="form-row">
           <div class="form-group">
             <label>שם התמהיל</label>
-            <input type="text" id="oil-name" placeholder="למשל: תמהיל לילה"/>
+            <input type="text" id="oil-name" placeholder="למשל: תמהיל לילה" required/>
           </div>
           <div class="form-group">
             <label>מטרה</label>
-            <input type="text" id="oil-purpose" placeholder="הקלת כאבים, שינה..."/>
+            <input type="text" id="oil-purpose" placeholder="הקלת כאבים, שינה..." required/>
           </div>
         </div>
         <div class="form-group">
           <label>רכיבים</label>
-          <input type="text" id="oil-ingredients" placeholder="לבנדר, פרנקינסנס, שמן שקדים..."/>
+          <input type="text" id="oil-ingredients" placeholder="לבנדר, פרנקינסנס, שמן שקדים..." required/>
         </div>
         <div class="form-group">
           <label>הוראות שימוש</label>
-          <textarea id="oil-instructions" placeholder="כיצד ומתי להשתמש..."></textarea>
+          <textarea id="oil-instructions" placeholder="כיצד ומתי להשתמש..." required></textarea>
         </div>
         <button class="btn-save" onclick="saveOil()">עדכון</button>
       </div>
@@ -612,15 +612,21 @@
 
   async function saveOil() {
     const name = document.getElementById('oil-name').value.trim();
-    if (!name) { alert('חסר שם לשמן'); return; }
+    const purpose = document.getElementById('oil-purpose').value.trim();
+    const ingredients = document.getElementById('oil-ingredients').value.trim();
+    const instructions = document.getElementById('oil-instructions').value.trim();
+    if (!name || !purpose || !ingredients || !instructions) {
+      alert('כל השדות הם חובה — שם, מטרה, רכיבים והוראות שימוש');
+      return;
+    }
     await api('oils', {
       method: 'POST',
       body: JSON.stringify({
         client_id: currentClientId,
         name,
-        purpose: document.getElementById('oil-purpose').value.trim(),
-        ingredients: document.getElementById('oil-ingredients').value.trim(),
-        instructions: document.getElementById('oil-instructions').value.trim()
+        purpose,
+        ingredients,
+        instructions
       })
     });
     await loadOils(currentClientId);
