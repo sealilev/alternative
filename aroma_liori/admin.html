@@ -696,7 +696,7 @@
           </div>
           <div class="form-group">
             <label>מגדר</label>
-            <select id="prof-gender" style="background:rgba(30,12,2,0.5)">${genderOptions}</select>
+            <select id="prof-gender" style="background:rgba(30,12,2,0.5);color:var(--text-light)">${genderOptions}</select>
           </div>
         </div>
         <div class="form-row">
@@ -804,125 +804,34 @@
     }
   }
 
-  // ── ARCHIVE ──────────────────────────────────
-  let archiveMode = false;
-
   async function showArchive() {
-    archiveMode = true;
     const clients = await api('clients?select=*&archived=eq.true&order=archived_at.desc');
-
-    // עדכן סיידבר
-    document.querySelector('.sidebar-title').textContent = '📁 ארכיון';
-    const list = document.getElementById('client-list');
-    list.innerHTML = clients.length
-      ? clients.map(c => `
-          <div class="client-item" onclick="selectArchiveClient('${c.id}','${c.name}')" id="ci-${c.id}">
-            <div class="client-item-name">${c.name}</div>
-            <div class="client-item-email">${c.archived_at ? new Date(c.archived_at).toLocaleDateString('he-IL') : ''}</div>
-          </div>
-        `).join('')
-      : '<div style="padding:16px;color:var(--text-dim);font-size:0.86rem">הארכיון ריק</div>';
-
-    // כפתור חזרה לפעילים
-    document.querySelector('.btn-add').style.display = 'none';
-    const archiveBtn = document.querySelectorAll('.btn-add')[1];
-    if (archiveBtn) archiveBtn.textContent = '← חזרה ללקוחות פעילים';
-    if (archiveBtn) archiveBtn.onclick = exitArchive;
-
-    clearPanel();
-  }
-
-  async function exitArchive() {
-    archiveMode = false;
-    document.querySelector('.sidebar-title').textContent = 'לקוחות פעילים';
-    document.querySelector('.btn-add').style.display = '';
-    const archiveBtn = document.querySelectorAll('.btn-add')[1];
-    if (archiveBtn) archiveBtn.textContent = '📁 ארכיון';
-    if (archiveBtn) archiveBtn.onclick = showArchive;
-    await loadClients();
-    clearPanel();
-  }
-
-  async function selectArchiveClient(id, name) {
-    currentClientId = id;
-    document.querySelectorAll('.client-item').forEach(el => el.classList.remove('active'));
-    document.getElementById(`ci-${id}`)?.classList.add('active');
-
     const panel = document.getElementById('main-panel');
+
+    if (!clients.length) {
+      panel.innerHTML = `
+        <div class="no-selection">
+          <p>הארכיון ריק</p>
+          <small>לקוחות שסיימו טיפול יופיעו כאן</small>
+        </div>`;
+      return;
+    }
+
     panel.innerHTML = `
-      <div class="panel-header">
-        <div style="display:flex;align-items:center;gap:16px">
-          <button onclick="showArchive()" style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 12px;color:var(--text-dim);font-family:Assistant,sans-serif;font-size:0.8rem;cursor:pointer">← ארכיון</button>
-          <div class="panel-client-name">${name}</div>
+      <div style="margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+          <button onclick="clearPanel()" style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 12px;color:var(--text-dim);font-family:Assistant,sans-serif;font-size:0.8rem;cursor:pointer">← חזרה</button>
+          <div class="panel-client-name" style="font-size:1.6rem">📁 ארכיון</div>
         </div>
-        <div style="display:flex;gap:10px">
-          <div class="link-box" onclick="restoreClient('${id}')" style="border-color:rgba(90,158,111,0.5);color:rgba(90,200,130,0.9)">
-            ✓ העבר לפעיל
-          </div>
-          <div class="link-box" onclick="deleteClient('${id}')" style="border-color:rgba(200,80,80,0.4);color:rgba(220,120,120,0.8)">
-            🗑 מחיקה
-          </div>
-        </div>
-      </div>
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('oils')">שמנים</div>
-        <div class="tab" onclick="switchTab('progress')">עדכוני התקדמות</div>
-        <div class="tab" onclick="switchTab('profile')">פרטים אישיים</div>
-      </div>
-      <div class="tab-panel active" id="tab-oils"></div>
-      <div class="tab-panel" id="tab-progress"></div>
-      <div class="tab-panel" id="tab-profile"></div>
-    `;
-
-    await loadOilsReadOnly(id);
-    await loadProgress(id);
-    await loadProfileReadOnly(id);
-  }
-
-  async function loadOilsReadOnly(clientId) {
-    const oils = await api(`oils?client_id=eq.${clientId}&select=*&order=created_at.asc`);
-    const el = document.getElementById('tab-oils');
-    el.innerHTML = oils.length
-      ? oils.map(o => `
-          <div class="oil-row">
-            <div class="oil-row-name">${o.name}</div>
-            <div class="oil-row-details">
-              ${o.ingredients ? `<b>רכיבים:</b> ${o.ingredients}<br>` : ''}
-              ${o.purpose ? `<b>מטרה:</b> ${o.purpose}<br>` : ''}
-              ${o.instructions ? `<b>הוראות:</b> ${o.instructions}` : ''}
+        ${clients.map(c => `
+          <div class="oil-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div>
+              <div class="oil-row-name">${c.name}</div>
+              <div style="font-size:0.76rem;color:var(--text-dim)">${c.email} · הועבר לארכיון: ${c.archived_at ? new Date(c.archived_at).toLocaleDateString('he-IL') : ''}</div>
             </div>
-          </div>`).join('')
-      : '<div class="empty-state">אין שמנים</div>';
-  }
-
-  async function loadProfileReadOnly(clientId) {
-    const clients = await api(`clients?id=eq.${clientId}&select=*`);
-    const c = clients[0] || {};
-    const el = document.getElementById('tab-profile');
-
-    const fields = [
-      ['שם מלא', c.full_name],
-      ['מייל', c.email],
-      ['טלפון', c.phone],
-      ['מגדר', c.gender],
-      ['תאריך לידה', c.birth_date ? new Date(c.birth_date).toLocaleDateString('he-IL') + (calcAge(c.birth_date) ? ' · גיל ' + calcAge(c.birth_date) : '') : null],
-      ['גובה', c.height ? c.height + ' ס"מ' : null],
-      ['משקל', c.weight ? c.weight + ' ק"ג' : null],
-      ['כתובת', c.address],
-      ['סיבת פנייה', c.reason],
-      ['רקע', c.background],
-    ].filter(([,v]) => v);
-
-    el.innerHTML = `
-      <div class="add-form">
-        <h4>פרטים אישיים — קריאה בלבד</h4>
-        ${fields.map(([label, val]) => `
-          <div class="form-group">
-            <label>${label}</label>
-            <div style="padding:10px 12px;background:rgba(30,12,2,0.3);border:1px solid var(--border);border-radius:4px;color:var(--text-mid);font-size:0.88rem;line-height:1.6">${val}</div>
+            <button onclick="restoreClient('${c.id}')" class="btn-save" style="font-size:0.78rem;padding:8px 16px">העבר לפעיל</button>
           </div>
         `).join('')}
-        ${!fields.length ? '<div class="empty-state">אין פרטים אישיים</div>' : ''}
       </div>`;
   }
 
@@ -938,26 +847,10 @@
       body: JSON.stringify({ archived: false, archived_at: null })
     });
     if (res.ok) {
-      await exitArchive();
+      await loadClients();
+      clearPanel();
     }
   }
-
-  async function deleteClient(clientId) {
-    if (!confirm('למחוק את הלקוח/ה לצמיתות? פעולה זו לא ניתנת לביטול!')) return;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${clientId}`, {
-      method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'return=minimal'
-      }
-    });
-    if (res.ok) {
-      await showArchive();
-    }
-  }
-
-
 
 </script>
 
