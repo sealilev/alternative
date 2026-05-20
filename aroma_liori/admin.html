@@ -513,12 +513,51 @@
 <div class="coming-soon" id="inventory-screen">
   <nav>
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
-    <span class="nav-badge">ניהול מלאי</span>
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="btn-back" onclick="showHome()">← ראשי</button>
+      <span class="nav-badge">ניהול מלאי</span>
+    </div>
   </nav>
-  <div class="coming-soon-inner">
-    <h2>ניהול מלאי</h2>
-    <p>מודול המלאי בבנייה — כאן תוכלי לעקוב אחר כמויות השמנים וחומרי הגלם שברשותך.</p>
-    <button class="btn-back" onclick="showHome()">← חזרה לדף הראשי</button>
+
+  <div style="max-width:860px;margin:0 auto;padding:100px 24px 60px;">
+
+    <div style="margin-bottom:40px;">
+      <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.24em;color:var(--amber);text-transform:uppercase;margin-bottom:10px;">מלאי</p>
+      <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--sand);">ניהול שמנים</h1>
+    </div>
+
+    <!-- ADD OIL FORM -->
+    <div class="add-form" style="margin-bottom:36px;">
+      <h4>הוספת שמן למלאי</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>שם השמן *</label>
+          <input type="text" id="inv-name" placeholder="למשל: לבנדר, פרנקינסנס..."/>
+        </div>
+        <div class="form-group">
+          <label>כמות (מ"ל) *</label>
+          <input type="number" id="inv-qty" placeholder="0" min="0" step="0.5"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>מאפיינים טיפוליים</label>
+        <input type="text" id="inv-properties" placeholder="למשל: מרגיע, אנטי-דלקתי, משכך כאבים..."/>
+      </div>
+      <div class="form-group">
+        <label>הוראות מיוחדות</label>
+        <textarea id="inv-instructions" placeholder="אחסון, זהירות, דילול מומלץ..."></textarea>
+      </div>
+      <button class="btn-save" onclick="addInventoryItem()">+ הוספה למלאי</button>
+      <div id="inv-success" style="display:none;margin-top:12px;color:var(--gold);font-size:0.86rem;">✓ השמן נוסף למלאי!</div>
+    </div>
+
+    <!-- INVENTORY LIST -->
+    <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.22em;color:var(--amber);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+      המלאי שלי
+      <span style="flex:1;height:1px;background:var(--border);display:block;"></span>
+    </p>
+    <div id="inventory-list"></div>
+
   </div>
 </div>
 
@@ -584,6 +623,7 @@
       document.getElementById('suppliers-screen').style.display = 'block';
     } else if (section === 'inventory') {
       document.getElementById('inventory-screen').style.display = 'block';
+      loadInventory();
     }
   }
 
@@ -1006,6 +1046,54 @@
           </div>
         `).join('')}
       </div>`;
+  }
+
+  /* ── INVENTORY ── */
+  async function loadInventory() {
+    const items = await api('inventory?select=*&order=name.asc');
+    const el = document.getElementById('inventory-list');
+    if (!items.length) {
+      el.innerHTML = '<div class="empty-state">המלאי ריק — הוסיפי שמן ראשון!</div>';
+      return;
+    }
+    el.innerHTML = items.map(item => `
+      <div class="oil-row" style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="oil-row-name">${item.name}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);white-space:nowrap;margin-right:16px;">${item.quantity_ml} מ"ל</div>
+        </div>
+        <div class="oil-row-details">
+          ${item.properties ? `<b>מאפיינים:</b> ${item.properties}<br>` : ''}
+          ${item.instructions ? `<b>הוראות:</b> ${item.instructions}` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addInventoryItem() {
+    const name = document.getElementById('inv-name').value.trim();
+    const qty  = document.getElementById('inv-qty').value;
+    if (!name || qty === '') { alert('שם השמן וכמות הם שדות חובה'); return; }
+
+    await api('inventory', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        quantity_ml: parseFloat(qty),
+        properties:  document.getElementById('inv-properties').value.trim() || null,
+        instructions: document.getElementById('inv-instructions').value.trim() || null,
+      })
+    });
+
+    document.getElementById('inv-name').value = '';
+    document.getElementById('inv-qty').value = '';
+    document.getElementById('inv-properties').value = '';
+    document.getElementById('inv-instructions').value = '';
+
+    document.getElementById('inv-success').style.display = 'block';
+    setTimeout(() => document.getElementById('inv-success').style.display = 'none', 3000);
+
+    await loadInventory();
   }
 
   async function restoreClient(clientId) {
