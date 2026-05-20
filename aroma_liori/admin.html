@@ -732,28 +732,33 @@
 
     el.innerHTML = oilsHtml + `
       <div class="add-form">
-        <h4>הוספת שמן חדש</h4>
+        <h4>הוספת תמהיל חדש</h4>
         <div class="form-row">
           <div class="form-group">
-            <label>שם התמהיל</label>
-            <input type="text" id="oil-name" placeholder="למשל: תמהיל לילה" required/>
+            <label>שם התמהיל *</label>
+            <input type="text" id="oil-name" placeholder="למשל: תמהיל לילה"/>
           </div>
           <div class="form-group">
             <label>מטרה</label>
-            <input type="text" id="oil-purpose" placeholder="הקלת כאבים, שינה..." required/>
+            <input type="text" id="oil-purpose" placeholder="הקלת כאבים, שינה..."/>
           </div>
         </div>
         <div class="form-group">
-          <label>רכיבים</label>
-          <input type="text" id="oil-ingredients" placeholder="לבנדר, פרנקינסנס, שמן שקדים..." required/>
+          <label>רכיבי התמהיל</label>
+          <div id="blend-rows"></div>
+          <button id="add-blend-row-btn" onclick="addBlendRow()"
+            style="margin-top:8px;background:transparent;border:1px dashed rgba(212,168,90,0.4);border-radius:4px;padding:8px 16px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.82rem;cursor:pointer;">
+            + הוספת שמן נוסף לתמהיל
+          </button>
         </div>
         <div class="form-group">
           <label>הוראות שימוש</label>
-          <textarea id="oil-instructions" placeholder="כיצד ומתי להשתמש..." required></textarea>
+          <textarea id="oil-instructions" placeholder="כיצד ומתי להשתמש..."></textarea>
         </div>
-        <button class="btn-save" onclick="saveOil()">עדכון</button>
+        <button class="btn-save" onclick="saveOil()">שמירה</button>
       </div>
     `;
+    initBlendBuilder();
   }
 
   async function loadProgress(clientId) {
@@ -826,22 +831,61 @@
   async function saveOil() {
     const name = document.getElementById('oil-name').value.trim();
     const purpose = document.getElementById('oil-purpose').value.trim();
-    const ingredients = document.getElementById('oil-ingredients').value.trim();
     const instructions = document.getElementById('oil-instructions').value.trim();
-    if (!name || !purpose || !ingredients || !instructions) {
-      alert('כל השדות הם חובה — שם, מטרה, רכיבים והוראות שימוש');
-      return;
+    if (!name) { alert('שם התמהיל הוא שדה חובה'); return; }
+
+    // איסוף רכיבי התמהיל
+    const rows = document.querySelectorAll('.blend-row');
+    const components = [];
+    for (const row of rows) {
+      const oilId = row.querySelector('.blend-oil-select').value;
+      const qty = parseFloat(row.querySelector('.blend-qty').value);
+      if (oilId && qty > 0) components.push({ oilId, qty });
     }
+    if (!components.length) { alert('יש לבחור לפחות שמן אחד לתמהיל'); return; }
+
+    // בדיקת מלאי מספיק
+    const inventory = await getInventory();
+    for (const comp of components) {
+      const item = inventory.find(i => i.id === comp.oilId);
+      if (item && comp.qty > item.quantity_ml) {
+        alert(`לא ניתן לקחת ${comp.qty} מ"ל מ${item.name} — נשאר במלאי רק ${item.quantity_ml} מ"ל`);
+        return;
+      }
+    }
+
+    // בניית טקסט רכיבים
+    const ingredientsText = components.map(comp => {
+      const item = inventory.find(i => i.id === comp.oilId);
+      return `${item.name} ${comp.qty} מ"ל`;
+    }).join(', ');
+
+    // שמירת התמהיל
     await api('oils', {
       method: 'POST',
-      body: JSON.stringify({
-        client_id: currentClientId,
-        name,
-        purpose,
-        ingredients,
-        instructions
-      })
+      body: JSON.stringify({ client_id: currentClientId, name, purpose, ingredients: ingredientsText, instructions })
     });
+
+    // גריעה מהמלאי + איסוף התראות מלאי נמוך
+    const lowStock = [];
+    for (const comp of components) {
+      const item = inventory.find(i => i.id === comp.oilId);
+      const newQty = item.quantity_ml - comp.qty;
+      await api(`inventory?id=eq.${comp.oilId}`, {
+        method: 'PATCH',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ quantity_ml: newQty })
+      });
+      if (newQty <= 10) lowStock.push({ name: item.name, qty: newQty });
+      item.quantity_ml = newQty;
+    }
+
+    // התראת מלאי נמוך
+    if (lowStock.length) {
+      alert('שימי לב!\n' + lowStock.map(s => `⚠️ ${s.name} נשאר במלאי רק ${s.qty} מ"ל`).join('\n'));
+    }
+
+    inventoryCache = null;
     await loadOils(currentClientId);
   }
 
@@ -1054,6 +1098,59 @@
       </div>`;
   }
 
+  /* ── INVENTORY CACHE ── */
+  let inventoryCache = null;
+
+  async function getInventory() {
+    if (!inventoryCache) {
+      inventoryCache = await api('inventory?select=*&order=name.asc');
+    }
+    return inventoryCache;
+  }
+
+  /* ── BLEND BUILDER ── */
+  function buildBlendRowHtml(oils) {
+    const options = oils.map(o =>
+      `<option value="${o.id}" data-max="${o.quantity_ml}">${o.name} (${o.quantity_ml} מ"ל במלאי)</option>`
+    ).join('');
+    return `
+      <div class="blend-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <select class="blend-oil-select" style="flex:1;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;">
+          <option value="">— בחרי שמן —</option>
+          ${options}
+        </select>
+        <input type="number" class="blend-qty" placeholder='מ"ל' min="0.5" step="0.5"
+          style="width:80px;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;text-align:center;"/>
+        <button onclick="removeBlendRow(this)"
+          style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 10px;color:var(--text-dim);cursor:pointer;">✕</button>
+      </div>`;
+  }
+
+  async function initBlendBuilder() {
+    const oils = await getInventory();
+    const container = document.getElementById('blend-rows');
+    if (!container) return;
+    if (!oils.length) {
+      container.innerHTML = '<div class="empty-state" style="font-size:0.84rem;">אין שמנים במלאי — הוסיפי קודם שמנים בניהול המלאי</div>';
+      const btn = document.getElementById('add-blend-row-btn');
+      if (btn) btn.style.display = 'none';
+      return;
+    }
+    container.innerHTML = buildBlendRowHtml(oils);
+  }
+
+  async function addBlendRow() {
+    const oils = await getInventory();
+    document.getElementById('blend-rows').insertAdjacentHTML('beforeend', buildBlendRowHtml(oils));
+  }
+
+  function removeBlendRow(btn) {
+    const container = document.getElementById('blend-rows');
+    if (container.querySelectorAll('.blend-row').length > 1) {
+      btn.closest('.blend-row').remove();
+    }
+  }
+
   /* ── INVENTORY ── */
   function toggleInvForm() {
     const form = document.getElementById('inv-form');
@@ -1105,6 +1202,7 @@
     document.getElementById('inv-success').style.display = 'block';
     setTimeout(() => document.getElementById('inv-success').style.display = 'none', 3000);
 
+    inventoryCache = null;
     await loadInventory();
   }
 
