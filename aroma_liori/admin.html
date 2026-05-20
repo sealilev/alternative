@@ -312,6 +312,72 @@
       font-size: 0.86rem; cursor: pointer;
     }
 
+    /* ── HOME CARDS ── */
+    .home-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 36px 24px;
+      cursor: pointer;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+      backdrop-filter: blur(4px);
+      text-align: center;
+    }
+    .home-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(212,168,90,0.45);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+    }
+    .home-card-icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 18px;
+      background: rgba(212,168,90,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gold);
+    }
+    .home-card-icon svg { width: 26px; height: 26px; }
+    .home-card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 400;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .home-card-body {
+      font-size: 0.84rem; color: var(--text-dim); line-height: 1.7;
+    }
+
+    /* ── COMING SOON SCREEN ── */
+    .coming-soon {
+      display: none;
+      min-height: 100vh;
+    }
+    .coming-soon-inner {
+      max-width: 500px; margin: 0 auto;
+      padding: 140px 24px 60px;
+      text-align: center;
+    }
+    .coming-soon-inner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem; font-weight: 300;
+      color: var(--sand); margin-bottom: 14px;
+    }
+    .coming-soon-inner p { color: var(--text-dim); font-size: 0.94rem; line-height: 1.8; margin-bottom: 32px; }
+    .btn-back {
+      background: transparent;
+      border: 1px solid rgba(232,217,192,0.25);
+      border-radius: 4px;
+      padding: 10px 24px;
+      color: var(--text-dim);
+      font-family: 'Assistant', sans-serif;
+      font-size: 0.86rem; cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+    @media (max-width: 600px) {
+      #home-screen > div { grid-template-columns: 1fr !important; }
+    }
+
     .empty-state {
       text-align: center; padding: 28px;
       color: var(--text-dim); font-size: 0.88rem;
@@ -349,11 +415,64 @@
   </div>
 </div>
 
-<!-- ADMIN APP -->
-<div id="admin-app">
+<!-- HOME SCREEN -->
+<div id="home-screen" style="display:none; min-height:100vh; display:none; align-items:center; justify-content:center; flex-direction:column; padding:40px;">
   <nav>
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
     <span class="nav-badge">ממשק ניהול</span>
+  </nav>
+  <div style="margin-top:100px; text-align:center; width:100%; max-width:700px;">
+    <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.24em;color:var(--amber);text-transform:uppercase;margin-bottom:14px;">ניהול</p>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;color:var(--sand);margin-bottom:48px;">מה תרצי לנהל?</h1>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+
+      <div class="home-card" onclick="showSection('clients')">
+        <div class="home-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        <div class="home-card-title">לקוחות</div>
+        <div class="home-card-body">ניהול לקוחות, שמנים ועדכוני התקדמות</div>
+      </div>
+
+      <div class="home-card" onclick="showSection('suppliers')">
+        <div class="home-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="home-card-title">ספקים</div>
+        <div class="home-card-body">ניהול ספקי שמנים וחומרי גלם</div>
+      </div>
+
+      <div class="home-card" onclick="showSection('inventory')">
+        <div class="home-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="home-card-title">ניהול מלאי</div>
+        <div class="home-card-body">מעקב אחר שמנים וחומרי גלם במלאי</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN APP (clients) -->
+<div id="admin-app">
+  <nav>
+    <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="btn-back" onclick="showHome()">← ראשי</button>
+      <span class="nav-badge">לקוחות</span>
+    </div>
   </nav>
 
   <div class="admin-wrap">
@@ -374,6 +493,32 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- SUPPLIERS SCREEN -->
+<div class="coming-soon" id="suppliers-screen">
+  <nav>
+    <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
+    <span class="nav-badge">ספקים</span>
+  </nav>
+  <div class="coming-soon-inner">
+    <h2>ספקים</h2>
+    <p>מודול הספקים בבנייה — כאן תוכלי לנהל את ספקי השמנים וחומרי הגלם שלך.</p>
+    <button class="btn-back" onclick="showHome()">← חזרה לדף הראשי</button>
+  </div>
+</div>
+
+<!-- INVENTORY SCREEN -->
+<div class="coming-soon" id="inventory-screen">
+  <nav>
+    <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
+    <span class="nav-badge">ניהול מלאי</span>
+  </nav>
+  <div class="coming-soon-inner">
+    <h2>ניהול מלאי</h2>
+    <p>מודול המלאי בבנייה — כאן תוכלי לעקוב אחר כמויות השמנים וחומרי הגלם שברשותך.</p>
+    <button class="btn-back" onclick="showHome()">← חזרה לדף הראשי</button>
   </div>
 </div>
 
@@ -413,10 +558,32 @@
     const val = document.getElementById('pw-input').value;
     if (val === ADMIN_PASSWORD) {
       document.getElementById('pw-screen').style.display = 'none';
-      document.getElementById('admin-app').style.display = 'block';
-      loadClients();
+      showHome();
     } else {
       document.getElementById('pw-error').style.display = 'block';
+    }
+  }
+
+  function showHome() {
+    document.getElementById('home-screen').style.display = 'flex';
+    document.getElementById('admin-app').style.display = 'none';
+    document.getElementById('suppliers-screen').style.display = 'none';
+    document.getElementById('inventory-screen').style.display = 'none';
+  }
+
+  function showSection(section) {
+    document.getElementById('home-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display = 'none';
+    document.getElementById('suppliers-screen').style.display = 'none';
+    document.getElementById('inventory-screen').style.display = 'none';
+
+    if (section === 'clients') {
+      document.getElementById('admin-app').style.display = 'block';
+      loadClients();
+    } else if (section === 'suppliers') {
+      document.getElementById('suppliers-screen').style.display = 'block';
+    } else if (section === 'inventory') {
+      document.getElementById('inventory-screen').style.display = 'block';
     }
   }
 
