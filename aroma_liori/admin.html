@@ -521,13 +521,16 @@
 
   <div style="max-width:860px;margin:0 auto;padding:100px 24px 60px;">
 
-    <div style="margin-bottom:40px;">
-      <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.24em;color:var(--amber);text-transform:uppercase;margin-bottom:10px;">מלאי</p>
-      <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--sand);">ניהול שמנים</h1>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;">
+      <div>
+        <p style="font-size:0.72rem;font-weight:600;letter-spacing:0.24em;color:var(--amber);text-transform:uppercase;margin-bottom:10px;">מלאי</p>
+        <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;color:var(--sand);">ניהול שמנים</h1>
+      </div>
+      <button class="btn-save" onclick="toggleInvForm()" id="inv-toggle-btn">+ הוספת שמן</button>
     </div>
 
-    <!-- ADD OIL FORM -->
-    <div class="add-form" style="margin-bottom:36px;">
+    <!-- ADD OIL FORM (collapsed by default) -->
+    <div class="add-form" id="inv-form" style="display:none;margin-bottom:36px;">
       <h4>הוספת שמן למלאי</h4>
       <div class="form-row">
         <div class="form-group">
@@ -547,7 +550,10 @@
         <label>הוראות מיוחדות</label>
         <textarea id="inv-instructions" placeholder="אחסון, זהירות, דילול מומלץ..."></textarea>
       </div>
-      <button class="btn-save" onclick="addInventoryItem()">+ הוספה למלאי</button>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn-save" onclick="addInventoryItem()">שמירה</button>
+        <button class="btn-cancel" onclick="toggleInvForm()">ביטול</button>
+      </div>
       <div id="inv-success" style="display:none;margin-top:12px;color:var(--gold);font-size:0.86rem;">✓ השמן נוסף למלאי!</div>
     </div>
 
@@ -1049,6 +1055,12 @@
   }
 
   /* ── INVENTORY ── */
+  function toggleInvForm() {
+    const form = document.getElementById('inv-form');
+    const isOpen = form.style.display !== 'none';
+    form.style.display = isOpen ? 'none' : 'block';
+  }
+
   async function loadInventory() {
     const items = await api('inventory?select=*&order=name.asc');
     const el = document.getElementById('inventory-list');
