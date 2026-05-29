@@ -699,6 +699,9 @@
           <div class="link-box" onclick="archiveClient('${id}')" style="border-color:rgba(200,80,80,0.4);color:rgba(220,120,120,0.8)">
             📁 סיום טיפול
           </div>
+          <div class="link-box" onclick="deleteClient('${id}')" style="border-color:rgba(180,50,50,0.5);color:rgba(220,70,70,0.95)">
+            🗑 מחיקה
+          </div>
         </div>
       </div>
       <div class="tabs">
@@ -720,8 +723,16 @@
     const el = document.getElementById('tab-oils');
     const oilsHtml = allOils.length
       ? allOils.map(o => `
-          <div class="oil-row">
-            <div class="oil-row-name">${o.name}</div>
+          <div class="oil-row" id="oil-row-${o.id}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+              <div class="oil-row-name" style="margin-bottom:0">${o.name}</div>
+              <div style="display:flex;gap:6px;flex-shrink:0;margin-right:12px;">
+                <button onclick="editOil('${o.id}')"
+                  style="background:transparent;border:1px solid rgba(212,168,90,0.35);border-radius:4px;padding:4px 10px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.76rem;cursor:pointer;">✎ עריכה</button>
+                <button onclick="deleteOil('${o.id}')"
+                  style="background:transparent;border:1px solid rgba(200,80,80,0.35);border-radius:4px;padding:4px 10px;color:rgba(220,100,100,0.9);font-family:Assistant,sans-serif;font-size:0.76rem;cursor:pointer;">🗑 מחיקה</button>
+              </div>
+            </div>
             <div class="oil-row-details">
               ${o.ingredients ? `<b>רכיבים:</b> ${o.ingredients}<br>` : ''}
               ${o.purpose ? `<b>מטרה:</b> ${o.purpose}<br>` : ''}
@@ -947,8 +958,21 @@
         <h4>פרטים אישיים</h4>
         <div class="form-row">
           <div class="form-group">
-            <label>שם מלא</label>
+            <label>תעודת זהות *</label>
+            <input type="text" id="prof-id" value="${c.id_number || ''}"
+              placeholder="מספר ת.ז."
+              ${c.id_number ? 'readonly style="opacity:0.55;cursor:not-allowed;"' : ''}
+              dir="ltr"/>
+          </div>
+          <div class="form-group">
+            <label>שם מלא *</label>
             <input type="text" id="prof-fullname" value="${c.full_name || ''}" placeholder="שם פרטי ומשפחה"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>טלפון נייד *</label>
+            <input type="tel" id="prof-phone" value="${c.phone || ''}" placeholder="05X-XXXXXXX" dir="ltr"/>
           </div>
           <div class="form-group">
             <label>מייל</label>
@@ -957,9 +981,6 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>טלפון נייד</label>
-            <input type="tel" id="prof-phone" value="${c.phone || ''}" placeholder="05X-XXXXXXX" dir="ltr"/>
-          </div>
           <div class="form-group">
             <label>מגדר</label>
             <select id="prof-gender" style="background:rgba(30,12,2,0.5);color:var(--text-light)">${genderOptions}</select>
@@ -1013,11 +1034,19 @@
   }
 
   async function saveProfile(clientId) {
+    const idNumber  = document.getElementById('prof-id').value.trim();
+    const fullName  = document.getElementById('prof-fullname').value.trim();
+    const phone     = document.getElementById('prof-phone').value.trim();
+    if (!idNumber || !fullName || !phone) {
+      alert('ת.ז., שם מלא וטלפון הם שדות חובה (*)');
+      return;
+    }
     const birthdate = document.getElementById('prof-birthdate').value;
     const data = {
-      full_name:  document.getElementById('prof-fullname').value.trim(),
+      id_number:  idNumber,
+      full_name:  fullName,
+      phone:      phone,
       email:      document.getElementById('prof-email').value.trim(),
-      phone:      document.getElementById('prof-phone').value.trim(),
       gender:     document.getElementById('prof-gender').value,
       birth_date: birthdate || null,
       height:     parseInt(document.getElementById('prof-height').value) || null,
@@ -1209,6 +1238,60 @@
 
     inventoryCache = null;
     await loadInventory();
+  }
+
+  async function deleteClient(clientId) {
+    if (!confirm('למחוק את הלקוח/ה לצמיתות?\nכל השמנים והעדכונים יימחקו גם כן — פעולה זו בלתי הפיכה!')) return;
+    await api(`progress_updates?client_id=eq.${clientId}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+    await api(`oils?client_id=eq.${clientId}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+    await api(`clients?id=eq.${clientId}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+    clearPanel();
+    await loadClients();
+  }
+
+  function editOil(oilId) {
+    const oil = allOils.find(o => o.id === oilId);
+    if (!oil) return;
+    document.getElementById(`oil-row-${oilId}`).innerHTML = `
+      <div class="form-group">
+        <label>מטרה</label>
+        <input type="text" id="edit-purpose-${oilId}" value="${(oil.purpose || '').replace(/"/g,'&quot;')}"
+          style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;"/>
+      </div>
+      <div class="form-group">
+        <label>רכיבים</label>
+        <input type="text" id="edit-ingredients-${oilId}" value="${(oil.ingredients || '').replace(/"/g,'&quot;')}"
+          style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;"/>
+      </div>
+      <div class="form-group">
+        <label>הוראות שימוש</label>
+        <textarea id="edit-instructions-${oilId}"
+          style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;min-height:64px;resize:vertical;">${oil.instructions || ''}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button onclick="saveOilEdit('${oilId}')" class="btn-save" style="font-size:0.82rem;padding:8px 18px;">שמירה</button>
+        <button onclick="loadOils(currentClientId)" class="btn-cancel">ביטול</button>
+      </div>
+    `;
+  }
+
+  async function saveOilEdit(oilId) {
+    await api(`oils?id=eq.${oilId}`, {
+      method: 'PATCH',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({
+        purpose:      document.getElementById(`edit-purpose-${oilId}`).value.trim(),
+        ingredients:  document.getElementById(`edit-ingredients-${oilId}`).value.trim(),
+        instructions: document.getElementById(`edit-instructions-${oilId}`).value.trim(),
+      })
+    });
+    await loadOils(currentClientId);
+  }
+
+  async function deleteOil(oilId) {
+    if (!confirm('למחוק את השמן? פעולה זו בלתי הפיכה.')) return;
+    await api(`oils?id=eq.${oilId}`, { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } });
+    await loadOils(currentClientId);
   }
 
   async function restoreClient(clientId) {
