@@ -1017,7 +1017,10 @@
           <label>רקע ומידע נוסף</label>
           <textarea id="prof-background" placeholder="היסטוריה רפואית, העדפות, מידע חשוב...">${c.background || ''}</textarea>
         </div>
-        <button class="btn-save" onclick="saveProfile('${clientId}')">שמירה</button>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+          <button class="btn-save" onclick="saveProfile('${clientId}')">שמירה</button>
+          <button class="btn-cancel" onclick="loadProfile('${clientId}')">ביטול</button>
+        </div>
         <div id="profile-saved" style="display:none;margin-top:12px;color:var(--gold);font-size:0.86rem">✓ הפרטים נשמרו!</div>
       </div>
     `;
