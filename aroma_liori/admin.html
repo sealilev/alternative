@@ -746,10 +746,6 @@
         <div class="form-group">
           <label>רכיבי התמהיל</label>
           <div id="blend-rows"></div>
-          <button id="add-blend-row-btn" onclick="addBlendRow()"
-            style="margin-top:8px;background:transparent;border:1px dashed rgba(212,168,90,0.4);border-radius:4px;padding:8px 16px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.82rem;cursor:pointer;">
-            + הוספת שמן נוסף לתמהיל
-          </button>
         </div>
         <div class="form-group">
           <label>הוראות שימוש</label>
@@ -833,6 +829,7 @@
     const purpose = document.getElementById('oil-purpose').value.trim();
     const instructions = document.getElementById('oil-instructions').value.trim();
     if (!name) { alert('שם התמהיל הוא שדה חובה'); return; }
+    try {
 
     // איסוף רכיבי התמהיל
     const rows = document.querySelectorAll('.blend-row');
@@ -887,6 +884,11 @@
 
     inventoryCache = null;
     await loadOils(currentClientId);
+
+    } catch(e) {
+      console.error('saveOil error:', e);
+      alert('שגיאה בשמירה: ' + e.message);
+    }
   }
 
   async function saveNewClient() {
@@ -1121,8 +1123,10 @@
         </select>
         <input type="number" class="blend-qty" placeholder='מ"ל' min="0.5" step="0.5"
           style="width:80px;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;text-align:center;"/>
-        <button onclick="removeBlendRow(this)"
-          style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 10px;color:var(--text-dim);cursor:pointer;">✕</button>
+        <button onclick="addBlendRow()" title="הוספת שמן נוסף"
+          style="background:transparent;border:1px solid rgba(212,168,90,0.35);border-radius:4px;padding:6px 10px;color:var(--gold);cursor:pointer;font-size:1rem;">✓</button>
+        <button onclick="removeBlendRow(this)" title="הסרת שורה"
+          style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 10px;color:var(--text-dim);cursor:pointer;font-size:1rem;">✕</button>
       </div>`;
   }
 
