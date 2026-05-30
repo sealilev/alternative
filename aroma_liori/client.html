@@ -354,12 +354,10 @@
 
   <!-- PROGRESS -->
   <div class="progress-section">
-    <p class="section-label">יומן ההתקדמות שלך</p>
-    <div class="progress-list" id="progress-list"></div>
 
     <!-- ADD UPDATE -->
     <div class="add-update">
-      <h3>הוסיפי עדכון חדש</h3>
+      <h3>הוספת עדכון חדש</h3>
 
       <div class="form-group">
         <label>שמן (אופציונלי)</label>
@@ -384,9 +382,13 @@
         <textarea id="update-text" placeholder="כאן את יכולה לכתוב הכל — שינויים שהרגשת, תצפיות, שאלות למירית..."></textarea>
       </div>
 
-      <button class="btn-submit" id="submit-btn" onclick="submitUpdate()">שלחי עדכון למירית</button>
-      <div class="success-msg" id="success-msg">✓ העדכון נשמר! מירית תראה אותו בקרוב.</div>
+      <button class="btn-submit" id="submit-btn" onclick="submitUpdate()">שליחת עדכון</button>
+      <div class="success-msg" id="success-msg">✓ העדכון נשמר!</div>
     </div>
+
+    <p class="section-label" style="margin-top:40px;">יומן ההתקדמות שלך</p>
+    <div class="progress-list" id="progress-list"></div>
+
   </div>
 
 </main>
