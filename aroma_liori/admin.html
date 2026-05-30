@@ -542,6 +542,13 @@
           <input type="number" id="inv-qty" placeholder="0" min="0" step="0.5"/>
         </div>
       </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>תאריך הוספה</label>
+          <input type="date" id="inv-date"/>
+        </div>
+        <div class="form-group"></div>
+      </div>
       <div class="form-group">
         <label>מאפיינים טיפוליים</label>
         <input type="text" id="inv-properties" placeholder="למשל: מרגיע, אנטי-דלקתי, משכך כאבים..."/>
@@ -1196,6 +1203,10 @@
   }
 
   async function loadInventory() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('inv-date');
+    if (dateInput) { dateInput.value = today; dateInput.max = today; }
+
     const items = await api('inventory?select=*&order=name.asc');
     const el = document.getElementById('inventory-list');
     if (!items.length) {
@@ -1205,7 +1216,10 @@
     el.innerHTML = items.map(item => `
       <div class="oil-row" style="margin-bottom:14px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div class="oil-row-name">${item.name}</div>
+          <div>
+            <div class="oil-row-name" style="margin-bottom:2px;">${item.name}</div>
+            ${item.purchase_date ? `<div style="font-size:0.74rem;color:var(--text-dim);">${new Date(item.purchase_date).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
+          </div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);white-space:nowrap;margin-right:16px;">${item.quantity_ml} מ"ל</div>
         </div>
         <div class="oil-row-details">
@@ -1225,9 +1239,10 @@
       method: 'POST',
       body: JSON.stringify({
         name,
-        quantity_ml: parseFloat(qty),
-        properties:  document.getElementById('inv-properties').value.trim() || null,
-        instructions: document.getElementById('inv-instructions').value.trim() || null,
+        quantity_ml:   parseFloat(qty),
+        properties:    document.getElementById('inv-properties').value.trim() || null,
+        instructions:  document.getElementById('inv-instructions').value.trim() || null,
+        purchase_date: document.getElementById('inv-date').value || null,
       })
     });
 
