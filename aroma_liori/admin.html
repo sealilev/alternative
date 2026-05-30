@@ -1214,13 +1214,15 @@
       return;
     }
     el.innerHTML = items.map(item => `
-      <div class="oil-row" style="margin-bottom:14px;">
+      <div class="oil-row" style="margin-bottom:14px;${item.quantity_ml <= 10 ? 'border-color:rgba(220,100,100,0.4);' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
             <div class="oil-row-name" style="margin-bottom:2px;">${item.name}</div>
             ${item.purchase_date ? `<div style="font-size:0.74rem;color:var(--text-dim);">${new Date(item.purchase_date).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
           </div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--gold);white-space:nowrap;margin-right:16px;">${item.quantity_ml} מ"ל</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:${item.quantity_ml <= 10 ? '#E07070' : 'var(--gold)'};white-space:nowrap;margin-right:16px;">
+            ${item.quantity_ml <= 10 ? '⚠️ ' : ''}${item.quantity_ml} מ"ל
+          </div>
         </div>
         <div class="oil-row-details">
           ${item.properties ? `<b>מאפיינים:</b> ${item.properties}<br>` : ''}
