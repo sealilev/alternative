@@ -322,8 +322,18 @@
       .oil-meta { grid-template-columns: 1fr; }
     }
   </style>
+  <style>
+    .skip-link {
+      position: absolute; top: -100px; right: 0;
+      background: var(--gold); color: #3B1F08;
+      padding: 10px 20px; font-weight: 600; font-size: 0.9rem;
+      z-index: 9999; transition: top 0.2s; border-radius: 0 0 4px 4px;
+    }
+    .skip-link:focus { top: 0; }
+  </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
 
 <div id="loading">
   <div class="spinner"></div>
@@ -340,7 +350,7 @@
   <span class="nav-client-name" id="nav-name"></span>
 </nav>
 
-<main id="main-content">
+<main id="main-content" role="main">
 
   <div class="greeting">
     <p class="greeting-eyebrow">הדף האישי שלך</p>

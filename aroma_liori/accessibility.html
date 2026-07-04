@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>הצהרת נגישות | ליאורי ארומתרפיה</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Assistant:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #3B1F08;
+      --gold: #D4A85A;
+      --sand: #E8D9C0;
+      --text: #F5EDE0;
+      --text-mid: #D4C0A4;
+      --text-dim: #A08868;
+      --border: rgba(232,217,192,0.15);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Assistant', sans-serif;
+      font-weight: 300;
+      direction: rtl;
+      color: var(--text);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse 60% 55% at 72% 20%, #C87820 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 20% 75%, #7A3C10 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 50% 50%, #A05818 0%, transparent 65%),
+        #7A3E14;
+      background-attachment: fixed;
+    }
+    nav {
+      position: fixed; top:0; right:0; left:0; z-index:100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 22px 56px;
+      background: rgba(50,25,6,0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 300;
+      color: var(--sand); text-decoration: none;
+      letter-spacing: 0.06em;
+    }
+    .skip-link {
+      position: absolute; top: -100px; right: 0;
+      background: var(--gold); color: #3B1F08;
+      padding: 10px 20px; font-weight: 600; font-size: 0.9rem;
+      z-index: 9999; transition: top 0.2s; border-radius: 0 0 4px 4px;
+    }
+    .skip-link:focus { top: 0; }
+    main {
+      max-width: 760px; margin: 0 auto;
+      padding: 120px 24px 80px;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300; color: var(--sand);
+      margin-bottom: 8px;
+    }
+    .updated {
+      font-size: 0.8rem; color: var(--text-dim);
+      margin-bottom: 48px;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 400;
+      color: var(--gold); margin: 36px 0 12px;
+    }
+    p, li {
+      font-size: 0.96rem; color: var(--text-mid);
+      line-height: 1.9; margin-bottom: 10px;
+    }
+    ul { padding-right: 20px; margin-bottom: 10px; }
+    a { color: var(--gold); }
+    a:hover { color: var(--sand); }
+    footer {
+      background: rgba(15,8,2,0.85);
+      backdrop-filter: blur(8px);
+      color: var(--text-dim);
+      text-align: center;
+      padding: 34px 40px;
+      font-size: 0.8rem; line-height: 2;
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--text-mid); text-decoration: none; }
+    footer a:hover { color: var(--sand); }
+    @media (max-width: 600px) {
+      nav { padding: 18px 22px; }
+      main { padding: 100px 18px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+
+<nav aria-label="ניווט ראשי">
+  <a class="nav-logo" href="index.html">ליאורי</a>
+</nav>
+
+<main id="main-content">
+  <h1>הצהרת נגישות</h1>
+  <p class="updated">עודכן: יולי 2026</p>
+
+  <p>
+    ליאורי ארומתרפיה מחויבת לנגישות האתר עבור כלל המשתמשים, לרבות אנשים עם מוגבלויות,
+    בהתאם לתקנות שוויון זכויות לאנשים עם מוגבלות (התאמות נגישות לשירות), תש"ע–2013.
+  </p>
+
+  <h2>רמת הנגישות</h2>
+  <p>האתר שואף לעמוד בדרישות תקן <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> 2.1 ברמה AA.</p>
+
+  <h2>מה קיים באתר</h2>
+  <ul>
+    <li>כפתור "דלג לתוכן הראשי" בראש כל עמוד</li>
+    <li>טקסט חלופי (alt) על כל התמונות</li>
+    <li>מבנה כותרות היררכי ותקין</li>
+    <li>תוויות נגישות (aria-label) על אלמנטים אינטראקטיביים</li>
+    <li>ניווט מלא במקלדת</li>
+    <li>שפת האתר מוגדרת בקוד (עברית)</li>
+  </ul>
+
+  <h2>יצירת קשר בנושא נגישות</h2>
+  <p>
+    נתקלתם בקושי? נשמח לשמוע ולשפר.<br/>
+    <a href="mailto:aunisea@gmail.com">aunisea@gmail.com</a> |
+    <a href="https://wa.me/972584694464" aria-label="פתיחת שיחת וואטסאפ עם ליאורי">058-4694464</a>
+  </p>
+</main>
+
+<footer>
+  <p>© 2026 ליאורי | ארומתרפיה</p>
+  <p><a href="index.html">חזרה לדף הבית</a></p>
+</footer>
+
+</body>
+</html>
