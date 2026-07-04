@@ -441,9 +441,36 @@
     return ['😔','😐','🙂','😊','🌟'][n-1] || '•';
   }
 
+  function loadDemoPage() {
+    clientId = 'demo';
+    document.getElementById('client-name-title').textContent = 'ליאורה';
+    document.getElementById('nav-name').textContent = 'ליאורה';
+    document.getElementById('client-notes').textContent = 'תערובת אישית לרוגע ושינה טובה';
+    const demoOils = [
+      { id: 1, name: 'לבנדר', amount_ml: 30, blend_percentage: 40 },
+      { id: 2, name: 'ברגמוט', amount_ml: 20, blend_percentage: 30 },
+      { id: 3, name: 'וטיבר', amount_ml: 15, blend_percentage: 20 }
+    ];
+    renderOils(demoOils);
+    const sel = document.getElementById('oil-select');
+    demoOils.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o.id; opt.textContent = o.name; sel.appendChild(opt);
+    });
+    const demoProgress = [
+      { id: 1, created_at: '2026-06-20T10:00:00', feeling_before: 3, feeling_after: 7, notes: 'הרגשתי הרבה יותר רגועה אחרי השימוש', oils: { name: 'לבנדר' } },
+      { id: 2, created_at: '2026-07-01T18:30:00', feeling_before: 4, feeling_after: 8, notes: 'שינה מצוינת הלילה!', oils: { name: 'ברגמוט' } }
+    ];
+    renderProgress(demoProgress);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('page-content').style.display = 'block';
+  }
+
   async function loadPage() {
     const token = getToken();
     if (!token) { showError(); return; }
+
+    if (token === 'demo-liora-2026') { loadDemoPage(); return; }
 
     try {
       // load client
