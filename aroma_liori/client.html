@@ -447,9 +447,8 @@
     document.getElementById('nav-name').textContent = 'ליאורה';
     document.getElementById('client-notes').textContent = 'תערובת אישית לרוגע ושינה טובה';
     const demoOils = [
-      { id: 1, name: 'לבנדר', amount_ml: 30, blend_percentage: 40 },
-      { id: 2, name: 'ברגמוט', amount_ml: 20, blend_percentage: 30 },
-      { id: 3, name: 'וטיבר', amount_ml: 15, blend_percentage: 20 }
+      { id: 1, name: 'לבנדר', created_at: '2026-06-01T10:00:00', ingredients: 'לבנדר, קוקוס', purpose: 'רוגע ושינה', instructions: 'מריחה על הרדת ופרקי הידיים לפני השינה' },
+      { id: 2, name: 'ברגמוט ווטיבר', created_at: '2026-06-15T10:00:00', ingredients: 'ברגמוט, וטיבר, ג\'ורג\'וב', purpose: 'איזון מצב רוח', instructions: 'שאיפה ישירה מהבקבוק 3 פעמים' }
     ];
     renderOils(demoOils);
     const sel = document.getElementById('oil-select');
@@ -458,8 +457,8 @@
       opt.value = o.id; opt.textContent = o.name; sel.appendChild(opt);
     });
     const demoProgress = [
-      { id: 1, created_at: '2026-06-20T10:00:00', feeling_before: 3, feeling_after: 7, notes: 'הרגשתי הרבה יותר רגועה אחרי השימוש', oils: { name: 'לבנדר' } },
-      { id: 2, created_at: '2026-07-01T18:30:00', feeling_before: 4, feeling_after: 8, notes: 'שינה מצוינת הלילה!', oils: { name: 'ברגמוט' } }
+      { id: 1, created_at: '2026-06-20T10:00:00', feeling: 4, update_text: 'הרגשתי הרבה יותר רגועה אחרי השימוש. שנתי השתפרה מאוד!', oils: { name: 'לבנדר' } },
+      { id: 2, created_at: '2026-07-01T18:30:00', feeling: 5, update_text: 'שינה מצוינת הלילה. המשיך כמות.', oils: { name: 'ברגמוט ווטיבר' } }
     ];
     renderProgress(demoProgress);
     document.getElementById('loading').style.display = 'none';
