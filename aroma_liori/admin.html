@@ -688,7 +688,7 @@
     document.querySelectorAll('.client-item').forEach(el => el.classList.remove('active'));
     document.getElementById(`ci-${id}`)?.classList.add('active');
 
-    const clientLink = `${location.origin}${location.pathname.replace('admin.html','client.html')}?t=${token}`;
+    const clientLink = `${location.origin}${location.pathname.replace('admin.html','client.html').replace(/\/+/g,'/')}?t=${token}`;
 
     const panel = document.getElementById('main-panel');
     panel.innerHTML = `
