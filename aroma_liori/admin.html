@@ -698,8 +698,8 @@
           <div class="panel-client-name">${name}</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
-          <div class="link-box" onclick="copyLink('${clientLink}')">
-            📋 קישור ללקוח/ת
+          <div class="link-box" onclick="showLinkPanel('${clientLink}','${name}')">
+            🔗 שליחת קישור
           </div>
           <div class="link-box" onclick="archiveClient('${id}')" style="border-color:rgba(200,80,80,0.4);color:rgba(220,120,120,0.8)">
             📁 סיום טיפול
@@ -935,10 +935,31 @@
     `;
   }
 
-  function copyLink(link) {
-    navigator.clipboard.writeText(link).then(() => {
-      alert('הקישור הועתק! שלחי אותו ללקוחה 🔗');
-    });
+  function showLinkPanel(link, name) {
+    const existing = document.getElementById('link-modal');
+    if (existing) existing.remove();
+    const modal = document.createElement('div');
+    modal.id = 'link-modal';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);';
+    const waText = encodeURIComponent(`היי ${name}, הנה הקישור לדף האישי שלך: ${link}`);
+    const emailSubject = encodeURIComponent(`הדף האישי שלך - ליאורי ארומתרפיה`);
+    const emailBody = encodeURIComponent(`היי ${name},\n\nהנה הקישור לדף האישי שלך:\n${link}\n\nבאהבה,\nליאורי`);
+    modal.innerHTML = `
+      <div style="background:#2A1A0A;border:1px solid rgba(212,168,90,0.3);border-radius:10px;padding:28px 32px;max-width:520px;width:90%;direction:rtl;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div style="font-family:Assistant,sans-serif;font-size:1.1rem;color:var(--sand);">קישור עבור ${name}</div>
+          <button onclick="document.getElementById('link-modal').remove()" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
+        </div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,90,0.2);border-radius:6px;padding:12px 14px;font-size:0.8rem;color:var(--text-mid);word-break:break-all;margin-bottom:16px;font-family:monospace;">${link}</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="navigator.clipboard.writeText('${link}').then(()=>{this.textContent='✓ הועתק!';setTimeout(()=>this.textContent='📋 העתק קישור',2000)})" style="background:rgba(212,168,90,0.15);border:1px solid rgba(212,168,90,0.35);border-radius:6px;padding:12px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.95rem;cursor:pointer;">📋 העתק קישור</button>
+          <a href="https://wa.me/?text=${waText}" target="_blank" style="display:block;text-align:center;background:#25D366;border-radius:6px;padding:12px;color:#fff;font-family:Assistant,sans-serif;font-size:0.95rem;text-decoration:none;">💬 שלחי בווצאפ</a>
+          <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="display:block;text-align:center;background:rgba(232,217,192,0.1);border:1px solid rgba(232,217,192,0.2);border-radius:6px;padding:12px;color:var(--sand);font-family:Assistant,sans-serif;font-size:0.95rem;text-decoration:none;">✉ שלחי במייל</a>
+        </div>
+      </div>
+    `;
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
   }
 
   function openAddClient() { document.getElementById('add-client-modal').classList.add('open'); }
