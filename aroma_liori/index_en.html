@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Liori | Aromatherapy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep:    #3B1F08;
+      --sand:       #E8D9C0;
+      --terracotta: #D4956A;
+      --amber:      #C8843C;
+      --gold:       #D4A85A;
+      --text-light: #F5EDE0;
+      --text-mid:   #D4C0A4;
+      --text-dim:   #A08868;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      color: var(--text-light);
+      font-family: 'Assistant', sans-serif;
+      font-weight: 300;
+      direction: ltr;
+      text-align: left;
+      background:
+        radial-gradient(ellipse 60% 55% at 72% 20%, #C87820 0%, transparent 60%),
+        radial-gradient(ellipse 50% 45% at 20% 75%, #7A3C10 0%, transparent 55%),
+        radial-gradient(ellipse 70% 50% at 50% 50%, #A05818 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 85% 85%, #8B4A14 0%, transparent 50%),
+        radial-gradient(ellipse 45% 40% at 10% 15%, #6B3410 0%, transparent 50%),
+        #7A3E14;
+      background-attachment: fixed;
+    }
+
+    /* ══ NAV ══ */
+    nav {
+      position: fixed;
+      top: 0; right: 0; left: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 56px;
+      background: rgba(50, 25, 6, 0.7);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(232,217,192,0.12);
+    }
+
+    .nav-logo {
+      font-family: 'Assistant', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--sand);
+      letter-spacing: 0.06em;
+      text-decoration: none;
+    }
+
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 0.95rem; font-weight: 400;
+      color: var(--text-mid);
+      text-decoration: none; letter-spacing: 0.1em;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* ══ HERO ══ */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 40px 40px;
+    }
+
+    /* ── arc circle ── */
+    .arc-wrap {
+      position: relative;
+      width: 320px; height: 320px;
+      margin: 0 auto 36px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .arc-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      overflow: visible;
+    }
+
+    .arc-text {
+      font-family: 'Assistant', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 4px;
+      fill: #F0DFC0;
+    }
+
+    .photo-circle {
+      position: absolute;
+      top: 62px; left: 62px;
+      width: 196px; height: 196px;
+      border-radius: 50%;
+      background: rgba(60,30,8,0.6);
+      border: 1.5px solid rgba(232,217,192,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+
+    .photo-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+    /* ── hero text ── */
+    .hero-eyebrow {
+      font-size: 1.1rem; font-weight: 400;
+      letter-spacing: 0.18em;
+      color: rgba(240,223,192,0.75);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.15s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Assistant', sans-serif;
+      font-size: 1.32rem;
+      font-weight: 300;
+      line-height: 1.18;
+      color: var(--text-light);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.55s forwards;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem; font-weight: 300;
+      line-height: 1.9;
+      color: var(--text-mid);
+      max-width: 500px;
+      margin: 0 auto 44px;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.72s forwards;
+    }
+
+    .btn-primary {
+      display: inline-block;
+      font-size: 0.92rem; font-weight: 600;
+      letter-spacing: 0.12em;
+      color: #3B1F08;
+      background: #E8C880;
+      padding: 14px 40px;
+      border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+      opacity: 0;
+      animation: fadeUp 0.9s ease 0.88s forwards;
+    }
+    .btn-primary:hover { background: var(--sand); transform: translateY(-2px); }
+
+    /* ══ DIVIDER ══ */
+    .divider {
+      text-align: center; padding: 20px 0;
+      color: rgba(240,223,192,0.4);
+      font-size: 1.1rem; letter-spacing: 0.5em;
+    }
+
+    /* ══ ABOUT TEASER ══ */
+    .about-teaser {
+      padding: 90px 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 72px;
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(40,18,4,0.25);
+      backdrop-filter: blur(2px);
+    }
+
+    .about-img-block { flex-shrink: 0; position: relative; }
+    .about-img-block::before { content: none; }
+    .about-text { max-width: 460px; }
+
+    .section-eyebrow {
+      font-size: 1rem; font-weight: 600;
+      letter-spacing: 0.18em;
+      color: rgba(240,223,192,0.7);
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-family: 'Assistant', sans-serif;
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      font-weight: 300; line-height: 1.25;
+      color: var(--text-light); margin-bottom: 22px;
+    }
+    .section-title em { font-style: italic; color: #F5E0B0; }
+
+    .section-body {
+      font-size: 1.1rem; font-weight: 300;
+      line-height: 1.95; color: var(--text-mid);
+      margin-bottom: 32px;
+    }
+
+    .btn-outline {
+      display: inline-block;
+      font-size: 0.92rem; font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #E8C880;
+      border: 1.5px solid #E8C880;
+      padding: 12px 34px; border-radius: 2px;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn-outline:hover { background: #E8C880; color: #3B1F08; }
+
+    /* ══ SERVICES ══ */
+    .services {
+      padding: 90px 40px; text-align: center;
+      background: rgba(30,12,2,0.3);
+      backdrop-filter: blur(3px);
+      border-top: 1px solid rgba(232,217,192,0.1);
+      border-bottom: 1px solid rgba(232,217,192,0.1);
+    }
+    .services-header { margin-bottom: 56px; }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px; max-width: 1000px; margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(40,18,4,0.45);
+      border: 1px solid rgba(232,217,192,0.14);
+      border-radius: 4px; padding: 40px 28px;
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      backdrop-filter: blur(4px);
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+      border-color: rgba(232,217,192,0.3);
+    }
+
+    .card-icon {
+      width: 50px; height: 50px;
+      margin: 0 auto 18px;
+      background: rgba(232,217,192,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .card-icon svg { width: 24px; height: 24px; }
+
+    .card-title {
+      font-family: 'Assistant', sans-serif;
+      font-size: 1.28rem; font-weight: 400;
+      color: var(--text-light); margin-bottom: 10px;
+    }
+    .card-body { font-size: 1.02rem; font-weight: 300; line-height: 1.8; color: var(--text-mid); }
+
+    /* ══ QUOTE ══ */
+    .quote-banner {
+      padding: 80px 40px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .quote-banner::before {
+      content: '"';
+      position: absolute; top: -60px; left: 40px;
+      font-family: 'Assistant', sans-serif;
+      font-size: 20rem;
+      color: rgba(232,217,192,0.06);
+      line-height: 1; pointer-events: none;
+    }
+
+    .quote-text {
+      font-family: 'Assistant', sans-serif;
+      font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+      font-weight: 300; font-style: italic;
+      color: var(--sand);
+      max-width: 680px; margin: 0 auto 18px;
+      line-height: 1.65;
+    }
+    .quote-attr { font-size: 1rem; letter-spacing: 0.16em; color: rgba(232,217,192,0.5); text-transform: uppercase; }
+
+    /* ══ CONTACT ══ */
+    .contact-teaser {
+      padding: 90px 40px; text-align: center;
+      background: rgba(30,12,2,0.25);
+    }
+    .contact-teaser .section-title { margin-bottom: 14px; }
+    .contact-teaser .section-body  { max-width: 440px; margin: 0 auto 38px; }
+
+    /* ══ FOOTER ══ */
+    footer {
+      background: rgba(20,8,2,0.7);
+      backdrop-filter: blur(8px);
+      color: rgba(232,217,192,0.5);
+      text-align: center; padding: 34px 40px;
+      font-size: 0.95rem; font-weight: 300;
+      letter-spacing: 0.05em; line-height: 2;
+      border-top: 1px solid rgba(232,217,192,0.1);
+    }
+    footer a { color: rgba(232,217,192,0.7); text-decoration: none; }
+    footer a:hover { color: var(--sand); }
+    footer .footer-credit { margin-top: 6px; font-size: 0.72rem; opacity: 0.4; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 860px) {
+      nav { padding: 18px 22px; }
+      .about-teaser { flex-direction: column; gap: 44px; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    .skip-link {
+      position: absolute; top: -100px; left: 0;
+      background: var(--gold); color: #3B1F08;
+      padding: 10px 20px; font-weight: 600; font-size: 0.9rem;
+      z-index: 9999; transition: top 0.2s; border-radius: 0 0 4px 4px;
+    }
+    .skip-link:focus { top: 0; }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- NAV -->
+  <nav aria-label="Main navigation">
+    <a class="nav-logo" href="index_en.html">Liori</a>
+    <ul class="nav-links">
+      <li><a href="#services">Treatments</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="index.html" style="border:1px solid rgba(232,217,192,0.3);padding:4px 12px;border-radius:2px;letter-spacing:0.08em;">עב</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="main-content">
+    <p class="hero-eyebrow">Aromatherapy · Natural Essential Oils</p>
+
+    <div class="arc-wrap">
+      <svg class="arc-svg" viewBox="0 0 320 320">
+        <defs>
+          <path id="topArc" d="M 37,160 A 123,123 0 0,1 283,160"/>
+          <path id="bottomArc" d="M 37,160 A 123,123 0 0,0 283,160"/>
+        </defs>
+        <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(232,217,192,0.2)" stroke-width="1"/>
+        <circle cx="160" cy="160" r="100" fill="none" stroke="rgba(232,217,192,0.1)" stroke-width="0.5"/>
+        <text class="arc-text">
+          <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+            Aromatherapy · Natural Oils
+          </textPath>
+        </text>
+        <text class="arc-text">
+          <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">
+            Breathe. Feel. Transform.
+          </textPath>
+        </text>
+      </svg>
+      <div class="photo-circle">
+        <img src="pics/lioriface.png" alt="Liori"/>
+      </div>
+    </div>
+
+    <h1 class="hero-title">Inhale the Aroma of Nature</h1>
+    <p class="hero-subtitle">
+      Liori practices aromatherapy and believes in the healing power of nature.
+      Here you'll find a connection between essential oils, body and soul.
+    </p>
+    <div style="text-align:center">
+      <p style="font-family:'Assistant',sans-serif;font-size:1.32rem;font-weight:300;color:var(--sand);margin-bottom:20px">Get in touch with Liori</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <a class="btn-primary" href="mailto:aunisea@gmail.com" target="_blank" aria-label="Send email to Liori">✉ Send Email</a>
+        <a class="btn-primary" href="https://wa.me/972584694464?text=Hi%20Liori%2C%20I%20found%20your%20website%20and%20would%20love%20to%20connect" target="_blank" style="background:#40e0d0;color:#1a1a1a" aria-label="Open WhatsApp chat with Liori">💬 WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ABOUT TEASER -->
+  <section class="about-teaser">
+    <div class="about-img-block">
+      <img src="pics/liori.png" alt="Liori" style="width:300px;height:380px;object-fit:cover;object-position:top;border-radius:4px;display:block;border:1px solid rgba(232,217,192,0.2)"/>
+    </div>
+    <div class="about-text">
+      <h2 class="section-title">Liori - Aromatherapist</h2>
+      <p class="section-body">
+        Liori practices aromatherapy and holds deep respect for the healing powers of nature.
+        She believes every person deserves a full, loving presence throughout their healing journey.
+      </p>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services" id="services" aria-label="Treatments and services">
+    <div class="services-header">
+      <p class="section-eyebrow">What I Offer</p>
+      <h2 class="section-title">Treatments & Services</h2>
+    </div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4" aria-hidden="true">
+            <path d="M12 2C8 8 5 12.5 5 15.5a7 7 0 0014 0C19 12.5 16 8 12 2z"/>
+          </svg>
+        </div>
+        <h3 class="card-title">Personalized Oils</h3>
+        <p class="card-body">A brief service description will be added here.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4" aria-hidden="true">
+            <path d="M12 22C6 22 3 17 3 12c0-6 6-10 9-10s9 4 9 10c0 5-3 10-9 10z"/>
+            <path d="M12 22V12M12 12C9 9 6 8 3 12"/>
+          </svg>
+        </div>
+        <h3 class="card-title">Scar & Skin Treatment</h3>
+        <p class="card-body">A brief service description will be added here.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D4A85A" stroke-width="1.4" aria-hidden="true">
+            <path d="M18 11V6a2 2 0 00-2-2v0a2 2 0 00-2 2v0M14 10V4a2 2 0 00-2-2v0a2 2 0 00-2 2v2M10 10.5V6a2 2 0 00-2-2v0a2 2 0 00-2 2v8a6 6 0 006 6h2a6 6 0 006-6v-3a2 2 0 00-2-2v0a2 2 0 00-2 2v0"/>
+          </svg>
+        </div>
+        <h3 class="card-title">Pain Relief</h3>
+        <p class="card-body">A brief service description will be added here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section class="quote-banner">
+    <p class="quote-text">"Nature is the greatest healer — essential oils are its language"</p>
+    <p class="quote-attr">— Liori</p>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-teaser" id="contact">
+    <p class="section-eyebrow">Let's Talk</p>
+    <h2 class="section-title">Ready to <em>Begin?</em></h2>
+    <p class="section-body">I'd love to answer your questions and schedule a getting-to-know-you session.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a class="btn-primary" href="mailto:aunisea@gmail.com" target="_blank" aria-label="Send email to Liori">✉ Send Email</a>
+      <a class="btn-primary" href="https://wa.me/972584694464?text=Hi%20Liori%2C%20I%20found%20your%20website%20and%20would%20love%20to%20connect" target="_blank" style="background:#40e0d0;color:#1a1a1a" aria-label="Open WhatsApp chat with Liori">💬 WhatsApp</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Liori | Aromatherapy</p>
+    <p><a href="mailto:aunisea@gmail.com">aunisea@gmail.com</a> | <a href="https://wa.me/972584694464" target="_blank">058-4694464</a></p>
+    <p class="footer-credit"><a href="https://sealilev.github.io/liora-gifts/index.html" target="_blank">Designed & built by Liora Levi Sea++</a></p>
+  </footer>
+
+<!-- ══ ACCESSIBILITY WIDGET ══ -->
+<style>
+  #a11y-btn {
+    position: fixed; bottom: 28px; left: 28px; z-index: 9000;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--gold); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    transition: background 0.2s, transform 0.2s;
+  }
+  #a11y-btn:hover { background: var(--sand); transform: scale(1.07); }
+  #a11y-btn svg { width: 26px; height: 26px; fill: #3B1F08; }
+  #a11y-panel {
+    position: fixed; bottom: 90px; left: 28px; z-index: 9001;
+    background: rgba(30,12,2,0.96); border: 1px solid rgba(212,168,90,0.35);
+    border-radius: 10px; padding: 18px 20px 14px; min-width: 220px;
+    backdrop-filter: blur(14px); box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    direction: ltr; display: none;
+  }
+  #a11y-panel.open { display: block; }
+  .a11y-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .a11y-header span { font-family: 'Assistant', sans-serif; font-size: 1.1rem; font-weight: 400; color: var(--sand); letter-spacing: 0.06em; }
+  .a11y-close { background: none; border: none; color: var(--text-dim); font-size: 1.1rem; cursor: pointer; padding: 0 4px; }
+  .a11y-close:hover { color: var(--sand); }
+  .a11y-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-top: 1px solid rgba(212,168,90,0.15); font-size: 0.85rem; color: var(--text-mid); }
+  .a11y-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
+  .a11y-toggle input { opacity: 0; width: 0; height: 0; }
+  .a11y-toggle .slider { position: absolute; inset: 0; background: rgba(232,217,192,0.15); border-radius: 20px; cursor: pointer; transition: background 0.2s; }
+  .a11y-toggle .slider::before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: var(--text-dim); border-radius: 50%; transition: transform 0.2s, background 0.2s; }
+  .a11y-toggle input:checked + .slider { background: var(--gold); }
+  .a11y-toggle input:checked + .slider::before { transform: translateX(16px); background: #3B1F08; }
+  .a11y-font-btns { display: flex; gap: 6px; align-items: center; }
+  .a11y-font-btns button { background: rgba(232,217,192,0.1); border: 1px solid rgba(212,168,90,0.25); color: var(--text-mid); border-radius: 4px; cursor: pointer; padding: 2px 8px; font-family: 'Assistant', sans-serif; font-weight: 600; transition: background 0.15s; }
+  .a11y-font-btns button:hover { background: rgba(212,168,90,0.2); color: var(--sand); }
+  .a11y-font-size-label { font-size: 0.78rem; color: var(--text-dim); min-width: 30px; text-align: center; }
+  .a11y-reset { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 12px; padding: 7px; background: none; border: 1px solid rgba(212,168,90,0.2); border-radius: 6px; color: var(--text-dim); font-family: 'Assistant', sans-serif; font-size: 0.82rem; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+  .a11y-reset:hover { border-color: var(--gold); color: var(--gold); }
+  body.a11y-contrast { filter: contrast(1.6) brightness(1.1); }
+  body.a11y-links a { text-decoration: underline !important; outline: 1px solid var(--gold); outline-offset: 2px; }
+</style>
+
+<button id="a11y-btn" aria-label="Accessibility menu" aria-expanded="false" aria-controls="a11y-panel">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="M19 9H5a1 1 0 0 0 0 2h4.5l-1.2 8H10l1-6h2l1 6h1.7l-1.2-8H19a1 1 0 0 0 0-2z"/></svg>
+</button>
+
+<div id="a11y-panel" role="dialog" aria-label="Accessibility settings">
+  <div class="a11y-header"><span>Accessibility</span><button class="a11y-close" aria-label="Close accessibility menu">✕</button></div>
+  <div class="a11y-row"><span>High contrast</span><label class="a11y-toggle"><input type="checkbox" id="a11y-contrast-toggle" aria-label="Enable high contrast"><span class="slider"></span></label></div>
+  <div class="a11y-row"><span>Font size: <span class="a11y-font-size-label" id="a11y-font-label">Normal</span></span><div class="a11y-font-btns"><button id="a11y-font-plus" aria-label="Increase font size">A+</button><button id="a11y-font-minus" aria-label="Decrease font size">A−</button></div></div>
+  <div class="a11y-row"><span>Highlight links</span><label class="a11y-toggle"><input type="checkbox" id="a11y-links-toggle" aria-label="Highlight links"><span class="slider"></span></label></div>
+  <button class="a11y-reset" id="a11y-reset" aria-label="Reset accessibility settings"><span>↺</span> Reset</button>
+</div>
+
+<script>
+(function() {
+  const btn = document.getElementById('a11y-btn');
+  const panel = document.getElementById('a11y-panel');
+  const closeBtn = panel.querySelector('.a11y-close');
+  let fontSize = 0;
+  function togglePanel() { const open = panel.classList.toggle('open'); btn.setAttribute('aria-expanded', open); if (open) closeBtn.focus(); }
+  btn.addEventListener('click', togglePanel);
+  closeBtn.addEventListener('click', function() { panel.classList.remove('open'); btn.setAttribute('aria-expanded','false'); btn.focus(); });
+  document.addEventListener('keydown', function(e) { if (e.key==='Escape' && panel.classList.contains('open')) { panel.classList.remove('open'); btn.setAttribute('aria-expanded','false'); btn.focus(); } });
+  document.getElementById('a11y-contrast-toggle').addEventListener('change', function() { document.body.classList.toggle('a11y-contrast', this.checked); });
+  const labels = ['Very small','Small','Normal','Large','Very large','Huge','Extra huge'];
+  function applyFont() { document.documentElement.style.fontSize = (100 + fontSize*12)+'%'; document.getElementById('a11y-font-label').textContent = labels[Math.min(Math.max(fontSize+2,0),labels.length-1)]; }
+  document.getElementById('a11y-font-plus').addEventListener('click', function() { if (fontSize<4) { fontSize++; applyFont(); } });
+  document.getElementById('a11y-font-minus').addEventListener('click', function() { if (fontSize>-2) { fontSize--; applyFont(); } });
+  document.getElementById('a11y-links-toggle').addEventListener('change', function() { document.body.classList.toggle('a11y-links', this.checked); });
+  document.getElementById('a11y-reset').addEventListener('click', function() { fontSize=0; document.documentElement.style.fontSize=''; document.getElementById('a11y-font-label').textContent='Normal'; document.getElementById('a11y-contrast-toggle').checked=false; document.getElementById('a11y-links-toggle').checked=false; document.body.classList.remove('a11y-contrast','a11y-links'); });
+})();
+</script>
+
+</body>
+</html>
