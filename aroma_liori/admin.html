@@ -36,7 +36,7 @@
     /* ── PASSWORD SCREEN ── */
     #pw-screen {
       min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
+      display: none; align-items: center; justify-content: center;
     }
     .pw-box {
       background: var(--card);
@@ -78,6 +78,17 @@
     }
     .pw-btn:hover { background: var(--sand); }
     .pw-error { color: #E07070; font-size: 0.82rem; margin-top: 10px; display: none; }
+    .pw-info { color: var(--gold); font-size: 0.82rem; margin-top: 10px; line-height: 1.6; display: none; }
+    .pw-link {
+      background: none; border: none; margin-top: 14px;
+      color: var(--text-dim); font-family: 'Assistant', sans-serif;
+      font-size: 0.8rem; cursor: pointer; text-decoration: underline;
+    }
+    .pw-link:hover { color: var(--sand); }
+    #setpw-screen {
+      min-height: 100vh;
+      display: none; align-items: center; justify-content: center;
+    }
 
     /* ── ADMIN APP ── */
     #admin-app { display: none; }
@@ -409,9 +420,24 @@
   <div class="pw-box">
     <h2>ניהול</h2>
     <p>כניסה לממשק הניהול של ליאורי</p>
-    <input type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPw()"/>
-    <button class="pw-btn" onclick="checkPw()">כניסה</button>
-    <div class="pw-error" id="pw-error">סיסמה שגויה</div>
+    <input type="email" id="email-input" placeholder="מייל" autocomplete="username" style="letter-spacing:normal" onkeydown="if(event.key==='Enter')signIn()"/>
+    <input type="password" id="pw-input" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')signIn()"/>
+    <button class="pw-btn" id="signin-btn" onclick="signIn()">כניסה</button>
+    <div class="pw-error" id="pw-error"></div>
+    <button class="pw-link" onclick="forgotPassword()">שכחתי סיסמה</button>
+    <div class="pw-info" id="pw-info"></div>
+  </div>
+</div>
+
+<!-- SET PASSWORD SCREEN (הגעה מקישור הזמנה או איפוס סיסמה במייל) -->
+<div id="setpw-screen">
+  <div class="pw-box">
+    <h2>בחירת סיסמה</h2>
+    <p id="setpw-subtitle">בחרי סיסמה לכניסה לממשק הניהול</p>
+    <input type="password" id="new-pw" placeholder="סיסמה חדשה" autocomplete="new-password" style="letter-spacing:normal"/>
+    <input type="password" id="new-pw2" placeholder="אימות סיסמה" autocomplete="new-password" style="letter-spacing:normal" onkeydown="if(event.key==='Enter')setPassword()"/>
+    <button class="pw-btn" id="setpw-btn" onclick="setPassword()">שמירת סיסמה</button>
+    <div class="pw-error" id="setpw-error"></div>
   </div>
 </div>
 
@@ -419,7 +445,10 @@
 <div id="home-screen" style="display:none; min-height:100vh; display:none; align-items:center; justify-content:center; flex-direction:column; padding:40px;">
   <nav>
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
-    <span class="nav-badge">ממשק ניהול</span>
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="btn-back" onclick="signOut()">יציאה</button>
+      <span class="nav-badge">ממשק ניהול</span>
+    </div>
   </nav>
   <div style="margin-top:100px; text-align:center; width:100%; max-width:700px;">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
@@ -469,6 +498,7 @@
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
     <div style="display:flex;align-items:center;gap:16px">
       <button class="btn-back" onclick="showHome()">← ראשי</button>
+      <button class="btn-back" onclick="signOut()">יציאה</button>
       <span class="nav-badge">לקוחות</span>
     </div>
   </nav>
@@ -498,7 +528,10 @@
 <div class="coming-soon" id="suppliers-screen">
   <nav>
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
-    <span class="nav-badge">ספקים</span>
+    <div style="display:flex;align-items:center;gap:16px">
+      <button class="btn-back" onclick="signOut()">יציאה</button>
+      <span class="nav-badge">ספקים</span>
+    </div>
   </nav>
   <div class="coming-soon-inner">
     <h2>ספקים</h2>
@@ -513,6 +546,7 @@
     <a class="nav-logo" href="index.html">ליאורי | ארומתרפיה</a>
     <div style="display:flex;align-items:center;gap:16px">
       <button class="btn-back" onclick="showHome()">← ראשי</button>
+      <button class="btn-back" onclick="signOut()">יציאה</button>
       <span class="nav-badge">ניהול מלאי</span>
     </div>
   </nav>
@@ -595,26 +629,166 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
 <script>
   const SUPABASE_URL = 'https://ulkeegjpsvipbsltbelu.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_vvKFtWu8WB94csfEt5UhnA_mYKu0AeA';
-  const ADMIN_PASSWORD = 'liori2026';
+
+  // קישור מהמייל (הזמנה / איפוס סיסמה) מגיע עם פרטים אחרי ה-# בכתובת.
+  // קוראים אותם לפני שהספרייה מעבדת את הכתובת ומנקה אותה.
+  const urlHash = new URLSearchParams(location.hash.slice(1));
+  const linkType = urlHash.get('type');           // 'invite' או 'recovery'
+  const linkError = urlHash.get('error_description');
+
+  // Supabase Auth: הסיסמה נבדקת בשרת של Supabase, ובתמורה מתקבל JWT (כרטיס כניסה)
+  // שנשלח עם כל בקשה. הספרייה שומרת את החיבור ומחדשת את הכרטיס לפני שהוא פג.
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentClientId = null;
   let currentTab = 'oils';
   let allOils = [];
 
-  function checkPw() {
-    const val = document.getElementById('pw-input').value;
-    if (val === ADMIN_PASSWORD) {
-      document.getElementById('pw-screen').style.display = 'none';
-      showHome();
-    } else {
-      document.getElementById('pw-error').style.display = 'block';
+  async function signIn() {
+    const email = document.getElementById('email-input').value.trim();
+    const password = document.getElementById('pw-input').value;
+    const errEl = document.getElementById('pw-error');
+    errEl.style.display = 'none';
+    if (!email || !password) {
+      errEl.textContent = 'יש למלא מייל וסיסמה';
+      errEl.style.display = 'block';
+      return;
     }
+
+    const btn = document.getElementById('signin-btn');
+    btn.disabled = true;
+    btn.textContent = 'מתחברת...';
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    btn.disabled = false;
+    btn.textContent = 'כניסה';
+
+    if (error) {
+      errEl.textContent = error.message === 'Invalid login credentials'
+        ? 'מייל או סיסמה שגויים'
+        : 'שגיאה בכניסה: ' + error.message;
+      errEl.style.display = 'block';
+      return;
+    }
+    document.getElementById('pw-input').value = '';
+    showHome();
   }
 
+  async function signOut() {
+    await sb.auth.signOut();
+    showLogin();
+  }
+
+  // שולח מייל עם קישור לבחירת סיסמה חדשה. ההודעה זהה גם אם המייל לא רשום,
+  // כדי שאי אפשר יהיה לבדוק דרך הטופס אילו מיילים קיימים במערכת.
+  async function forgotPassword() {
+    const email = document.getElementById('email-input').value.trim();
+    const errEl = document.getElementById('pw-error');
+    const infoEl = document.getElementById('pw-info');
+    errEl.style.display = 'none';
+    infoEl.style.display = 'none';
+    if (!email) {
+      errEl.textContent = 'יש להקליד את המייל ואז ללחוץ "שכחתי סיסמה"';
+      errEl.style.display = 'block';
+      return;
+    }
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: location.origin + location.pathname
+    });
+    if (error && error.status !== 400) {
+      errEl.textContent = 'שגיאה בשליחה: ' + error.message;
+      errEl.style.display = 'block';
+      return;
+    }
+    infoEl.textContent = 'אם המייל רשום במערכת, נשלח אליו קישור לבחירת סיסמה חדשה.';
+    infoEl.style.display = 'block';
+  }
+
+  async function setPassword() {
+    const pw = document.getElementById('new-pw').value;
+    const pw2 = document.getElementById('new-pw2').value;
+    const errEl = document.getElementById('setpw-error');
+    errEl.style.display = 'none';
+    const fail = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
+    if (pw.length < 8) return fail('הסיסמה צריכה להיות באורך 8 תווים לפחות');
+    if (pw !== pw2) return fail('הסיסמאות לא זהות');
+
+    const btn = document.getElementById('setpw-btn');
+    btn.disabled = true;
+    btn.textContent = 'שומרת...';
+    const { error } = await sb.auth.updateUser({ password: pw });
+    btn.disabled = false;
+    btn.textContent = 'שמירת סיסמה';
+    if (error) return fail('שגיאה בשמירה: ' + error.message);
+
+    document.getElementById('new-pw').value = '';
+    document.getElementById('new-pw2').value = '';
+    showHome();
+  }
+
+  function hideAllScreens() {
+    ['pw-screen', 'setpw-screen', 'home-screen', 'admin-app', 'suppliers-screen', 'inventory-screen']
+      .forEach(id => document.getElementById(id).style.display = 'none');
+  }
+
+  function showLogin() {
+    hideAllScreens();
+    document.getElementById('pw-screen').style.display = 'flex';
+  }
+
+  function showSetPassword(subtitle) {
+    hideAllScreens();
+    document.getElementById('setpw-subtitle').textContent = subtitle;
+    document.getElementById('setpw-screen').style.display = 'flex';
+  }
+
+  // כותרות לכל בקשה: apikey מזהה את הפרויקט (ציבורי),
+  // Authorization נושא את הכרטיס של המנהלת המחוברת.
+  async function authHeaders() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      showLogin();
+      throw new Error('לא מחוברת');
+    }
+    return {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${session.access_token}`
+    };
+  }
+
+  // כניסה לדף:
+  // - הגעה מקישור הזמנה / איפוס → מסך בחירת סיסמה
+  // - קישור שפג תוקפו → מסך כניסה עם הודעה
+  // - חיבור שמור → ישר לדף הראשי, אחרת מסך כניסה
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (linkType || linkError) history.replaceState(null, '', location.pathname);
+
+    if (linkError) {
+      showLogin();
+      const errEl = document.getElementById('pw-error');
+      errEl.textContent = 'הקישור מהמייל לא תקף או שפג תוקפו. אפשר לבקש קישור חדש דרך "שכחתי סיסמה".';
+      errEl.style.display = 'block';
+    } else if (session && linkType === 'invite') {
+      showSetPassword('ברוכה הבאה! בחרי סיסמה לכניסה לממשק הניהול');
+    } else if (session && linkType === 'recovery') {
+      showSetPassword('בחרי סיסמה חדשה');
+    } else if (session) {
+      showHome();
+    } else {
+      showLogin();
+    }
+  });
+
+  sb.auth.onAuthStateChange(event => {
+    if (event === 'SIGNED_OUT') showLogin();
+  });
+
   function showHome() {
+    document.getElementById('pw-screen').style.display = 'none';
+    document.getElementById('setpw-screen').style.display = 'none';
     document.getElementById('home-screen').style.display = 'flex';
     document.getElementById('admin-app').style.display = 'none';
     document.getElementById('suppliers-screen').style.display = 'none';
@@ -642,14 +816,14 @@
     const { headers: extraHeaders = {}, ...restOptions } = options;
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        ...(await authHeaders()),
         'Content-Type': 'application/json',
         'Prefer': 'return=representation',
         ...extraHeaders
       },
       ...restOptions
     });
+    if (res.status === 401) { await signOut(); throw new Error('החיבור פג, יש להתחבר מחדש'); }
     if (!res.ok) throw new Error(await res.text());
     const text = await res.text();
     return text ? JSON.parse(text) : [];
@@ -800,8 +974,7 @@
     const res = await fetch(SUPABASE_URL + '/rest/v1/progress_updates?id=eq.' + progressId, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        ...(await authHeaders()),
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -1088,8 +1261,7 @@
     const res = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${clientId}`, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        ...(await authHeaders()),
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -1115,8 +1287,7 @@
     const res = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${clientId}`, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        ...(await authHeaders()),
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -1337,8 +1508,7 @@
     const res = await fetch(`${SUPABASE_URL}/rest/v1/clients?id=eq.${clientId}`, {
       method: 'PATCH',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        ...(await authHeaders()),
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
