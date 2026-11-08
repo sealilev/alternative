@@ -427,6 +427,12 @@
     return text ? JSON.parse(text) : null;
   }
 
+  // turns text into safe HTML: special characters are shown as text and never run as code
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
   function getToken() {
     const params = new URLSearchParams(window.location.search);
     return params.get('t') || params.get('token');
@@ -492,7 +498,7 @@
       <div class="oil-card" style="animation-delay:${i * 0.1}s">
         <div class="oil-card-header">
           <div>
-            <div class="oil-name">${o.name}</div>
+            <div class="oil-name">${esc(o.name)}</div>
             <div class="oil-date">${formatDate(o.created_at)}</div>
           </div>
         </div>
@@ -500,18 +506,18 @@
           ${o.ingredients ? `
           <div class="oil-meta-item">
             <label>רכיבים</label>
-            <p>${o.ingredients}</p>
+            <p>${esc(o.ingredients)}</p>
           </div>` : ''}
           ${o.purpose ? `
           <div class="oil-meta-item">
             <label>מטרה</label>
-            <p>${o.purpose}</p>
+            <p>${esc(o.purpose)}</p>
           </div>` : ''}
         </div>
         ${o.instructions ? `
         <div class="oil-instructions">
           <label>הוראות שימוש</label>
-          <p>${o.instructions}</p>
+          <p>${esc(o.instructions)}</p>
         </div>` : ''}
       </div>
     `).join('');
@@ -527,9 +533,9 @@
       <div class="progress-item" style="animation-delay:${i * 0.08}s">
         <div class="progress-feeling">${p.feeling ? feelingEmoji(p.feeling) : '•'}</div>
         <div class="progress-body">
-          <div class="progress-text">${p.update_text}</div>
+          <div class="progress-text">${esc(p.update_text)}</div>
           <div class="progress-meta">
-            ${p.oil_name ? `${p.oil_name} · ` : ''}${formatDate(p.created_at)}
+            ${p.oil_name ? `${esc(p.oil_name)} · ` : ''}${formatDate(p.created_at)}
           </div>
         </div>
       </div>

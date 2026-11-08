@@ -645,6 +645,7 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let currentClientId = null;
+  let clientsById = {};
   let currentTab = 'oils';
   let allOils = [];
 
@@ -837,8 +838,15 @@
     return ['😔','😐','🙂','😊','🌟'][n-1] || '•';
   }
 
+  // turns text into safe HTML: special characters are shown as text and never run as code
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
   async function loadClients() {
     const clients = await api('clients?select=*&archived=neq.true&order=created_at.asc');
+    clientsById = Object.fromEntries(clients.map(c => [c.id, c]));
     const unreadCounts = {};
     await Promise.all(clients.map(async c => {
       const unread = await api(`progress_updates?client_id=eq.${c.id}&read_at=is.null&select=id`);
@@ -849,30 +857,29 @@
       const count = unreadCounts[c.id] || 0;
       const badge = count > 0 ? `<span class="unread-badge">${count}</span>` : '';
       return `
-        <div class="client-item" onclick="selectClient('${c.id}','${c.name}','${c.token}')" id="ci-${c.id}">
-          <div class="client-item-name">${c.name} ${badge}</div>
-          <div class="client-item-email">${c.email}</div>
+        <div class="client-item" onclick="selectClient('${c.id}')" id="ci-${c.id}">
+          <div class="client-item-name">${esc(c.name)} ${badge}</div>
+          <div class="client-item-email">${esc(c.email)}</div>
         </div>
       `;
     }).join('');
   }
 
-  async function selectClient(id, name, token) {
+  async function selectClient(id) {
+    const name = clientsById[id]?.name;
     currentClientId = id;
     document.querySelectorAll('.client-item').forEach(el => el.classList.remove('active'));
     document.getElementById(`ci-${id}`)?.classList.add('active');
-
-    const clientLink = `${location.origin}${location.pathname.replace('admin.html','client.html').replace(/\/+/g,'/')}?t=${token}`;
 
     const panel = document.getElementById('main-panel');
     panel.innerHTML = `
       <div class="panel-header">
         <div style="display:flex;align-items:center;gap:16px">
           <button onclick="clearPanel()" style="background:transparent;border:1px solid rgba(232,217,192,0.2);border-radius:4px;padding:6px 12px;color:var(--text-dim);font-family:Assistant,sans-serif;font-size:0.8rem;cursor:pointer;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(232,217,192,0.5)'" onmouseout="this.style.borderColor='rgba(232,217,192,0.2)'">← רשימה</button>
-          <div class="panel-client-name">${name}</div>
+          <div class="panel-client-name">${esc(name)}</div>
         </div>
         <div style="display:flex;gap:10px;align-items:center">
-          <div class="link-box" onclick="showLinkPanel('${clientLink}','${name}')">
+          <div class="link-box" onclick="showLinkPanel('${id}')">
             🔗 שליחת קישור
           </div>
           <div class="link-box" onclick="archiveClient('${id}')" style="border-color:rgba(200,80,80,0.4);color:rgba(220,120,120,0.8)">
@@ -904,7 +911,7 @@
       ? allOils.map(o => `
           <div class="oil-row" id="oil-row-${o.id}">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-              <div class="oil-row-name" style="margin-bottom:0">${o.name}</div>
+              <div class="oil-row-name" style="margin-bottom:0">${esc(o.name)}</div>
               <div style="display:flex;gap:6px;flex-shrink:0;margin-right:12px;">
                 <button onclick="editOil('${o.id}')"
                   style="background:transparent;border:1px solid rgba(212,168,90,0.35);border-radius:4px;padding:4px 10px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.76rem;cursor:pointer;">✎ עריכה</button>
@@ -913,9 +920,9 @@
               </div>
             </div>
             <div class="oil-row-details">
-              ${o.ingredients ? `<b>רכיבים:</b> ${o.ingredients}<br>` : ''}
-              ${o.purpose ? `<b>מטרה:</b> ${o.purpose}<br>` : ''}
-              ${o.instructions ? `<b>הוראות:</b> ${o.instructions}` : ''}
+              ${o.ingredients ? `<b>רכיבים:</b> ${esc(o.ingredients)}<br>` : ''}
+              ${o.purpose ? `<b>מטרה:</b> ${esc(o.purpose)}<br>` : ''}
+              ${o.instructions ? `<b>הוראות:</b> ${esc(o.instructions)}` : ''}
             </div>
           </div>
         `).join('')
@@ -962,10 +969,10 @@
         + ' style="' + (isNew ? 'border-color:rgba(200,132,60,0.45);cursor:pointer;' : '') + '">'
         + '<div class="prog-feeling">' + (p.feeling ? feelingEmoji(p.feeling) : '•') + '</div>'
         + '<div style="flex:1">'
-        + '<div class="prog-text">' + p.update_text
+        + '<div class="prog-text">' + esc(p.update_text)
         + (isNew ? ' <span id="new-' + p.id + '" style="font-size:0.7rem;color:var(--amber);font-weight:600"> חדש ✓</span>' : '')
         + '</div>'
-        + '<div class="prog-meta">' + (p.oils ? p.oils.name + ' · ' : '') + formatDate(p.created_at) + '</div>'
+        + '<div class="prog-meta">' + (p.oils ? esc(p.oils.name) + ' · ' : '') + formatDate(p.created_at) + '</div>'
         + '</div></div>';
     }).join('');
   }
@@ -1108,7 +1115,9 @@
     `;
   }
 
-  function showLinkPanel(link, name) {
+  function showLinkPanel(id) {
+    const { name, token } = clientsById[id] || {};
+    const link = `${location.origin}${location.pathname.replace('admin.html','client.html').replace(/\/+/g,'/')}?t=${encodeURIComponent(token)}`;
     const existing = document.getElementById('link-modal');
     if (existing) existing.remove();
     const modal = document.createElement('div');
@@ -1120,12 +1129,12 @@
     modal.innerHTML = `
       <div style="background:#2A1A0A;border:1px solid rgba(212,168,90,0.3);border-radius:10px;padding:28px 32px;max-width:520px;width:90%;direction:rtl;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-          <div style="font-family:Assistant,sans-serif;font-size:1.1rem;color:var(--sand);">קישור עבור ${name}</div>
+          <div style="font-family:Assistant,sans-serif;font-size:1.1rem;color:var(--sand);">קישור עבור ${esc(name)}</div>
           <button onclick="document.getElementById('link-modal').remove()" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer;">✕</button>
         </div>
-        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,90,0.2);border-radius:6px;padding:12px 14px;font-size:0.8rem;color:var(--text-mid);word-break:break-all;margin-bottom:16px;font-family:monospace;">${link}</div>
+        <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,90,0.2);border-radius:6px;padding:12px 14px;font-size:0.8rem;color:var(--text-mid);word-break:break-all;margin-bottom:16px;font-family:monospace;" id="link-text">${esc(link)}</div>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <button onclick="navigator.clipboard.writeText('${link}').then(()=>{this.textContent='✓ הועתק!';setTimeout(()=>this.textContent='📋 העתק קישור',2000)})" style="background:rgba(212,168,90,0.15);border:1px solid rgba(212,168,90,0.35);border-radius:6px;padding:12px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.95rem;cursor:pointer;">📋 העתק קישור</button>
+          <button onclick="navigator.clipboard.writeText(document.getElementById('link-text').textContent).then(()=>{this.textContent='✓ הועתק!';setTimeout(()=>this.textContent='📋 העתק קישור',2000)})" style="background:rgba(212,168,90,0.15);border:1px solid rgba(212,168,90,0.35);border-radius:6px;padding:12px;color:var(--gold);font-family:Assistant,sans-serif;font-size:0.95rem;cursor:pointer;">📋 העתק קישור</button>
           <a href="https://wa.me/?text=${waText}" target="_blank" style="display:block;text-align:center;background:#25D366;border-radius:6px;padding:12px;color:#fff;font-family:Assistant,sans-serif;font-size:0.95rem;text-decoration:none;">💬 שלחי בווצאפ</a>
           <a href="mailto:?subject=${emailSubject}&body=${emailBody}" style="display:block;text-align:center;background:rgba(232,217,192,0.1);border:1px solid rgba(232,217,192,0.2);border-radius:6px;padding:12px;color:var(--sand);font-family:Assistant,sans-serif;font-size:0.95rem;text-decoration:none;">✉ שלחי במייל</a>
         </div>
@@ -1158,24 +1167,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>תעודת זהות *</label>
-            <input type="text" id="prof-id" value="${c.id_number || ''}"
+            <input type="text" id="prof-id" value="${esc(c.id_number || '')}"
               placeholder="מספר ת.ז."
               ${c.id_number ? 'readonly style="opacity:0.55;cursor:not-allowed;"' : ''}
               dir="ltr"/>
           </div>
           <div class="form-group">
             <label>שם מלא *</label>
-            <input type="text" id="prof-fullname" value="${c.full_name || ''}" placeholder="שם פרטי ומשפחה"/>
+            <input type="text" id="prof-fullname" value="${esc(c.full_name || '')}" placeholder="שם פרטי ומשפחה"/>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>טלפון נייד *</label>
-            <input type="tel" id="prof-phone" value="${c.phone || ''}" placeholder="05X-XXXXXXX" dir="ltr"/>
+            <input type="tel" id="prof-phone" value="${esc(c.phone || '')}" placeholder="05X-XXXXXXX" dir="ltr"/>
           </div>
           <div class="form-group">
             <label>מייל</label>
-            <input type="email" id="prof-email" value="${c.email || ''}" placeholder="email@example.com" dir="ltr"/>
+            <input type="email" id="prof-email" value="${esc(c.email || '')}" placeholder="email@example.com" dir="ltr"/>
           </div>
         </div>
         <div class="form-row">
@@ -1189,32 +1198,32 @@
           <div class="form-group">
             <label>תאריך לידה</label>
             <div style="display:flex;gap:10px;align-items:center">
-              <input type="date" id="prof-birthdate" value="${c.birth_date || ''}" style="flex:1"/>
+              <input type="date" id="prof-birthdate" value="${esc(c.birth_date || '')}" style="flex:1"/>
               <span id="prof-age-display" style="font-size:0.82rem;color:var(--gold);white-space:nowrap">${c.birth_date ? calcAge(c.birth_date) + ' שנים' : ''}</span>
             </div>
           </div>
           <div class="form-group">
             <label>גובה (ס"מ)</label>
-            <input type="number" id="prof-height" value="${c.height || ''}" placeholder="גובה" min="0" max="250"/>
+            <input type="number" id="prof-height" value="${esc(c.height || '')}" placeholder="גובה" min="0" max="250"/>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>משקל (ק"ג)</label>
-            <input type="number" id="prof-weight" value="${c.weight || ''}" placeholder="משקל" min="0" max="300"/>
+            <input type="number" id="prof-weight" value="${esc(c.weight || '')}" placeholder="משקל" min="0" max="300"/>
           </div>
           <div class="form-group">
             <label>כתובת</label>
-            <input type="text" id="prof-address" value="${c.address || ''}" placeholder="עיר, רחוב..."/>
+            <input type="text" id="prof-address" value="${esc(c.address || '')}" placeholder="עיר, רחוב..."/>
           </div>
         </div>
         <div class="form-group">
           <label>סיבת פנייה</label>
-          <textarea id="prof-reason" placeholder="מה הביא את הלקוח/ה לטיפול...">${c.reason || ''}</textarea>
+          <textarea id="prof-reason" placeholder="מה הביא את הלקוח/ה לטיפול...">${esc(c.reason || '')}</textarea>
         </div>
         <div class="form-group">
           <label>רקע ומידע נוסף</label>
-          <textarea id="prof-background" placeholder="היסטוריה רפואית, העדפות, מידע חשוב...">${c.background || ''}</textarea>
+          <textarea id="prof-background" placeholder="היסטוריה רפואית, העדפות, מידע חשוב...">${esc(c.background || '')}</textarea>
         </div>
         <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
           <button class="btn-save" onclick="saveProfile('${clientId}')">שמירה</button>
@@ -1321,8 +1330,8 @@
         ${clients.map(c => `
           <div class="oil-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <div>
-              <div class="oil-row-name">${c.name}</div>
-              <div style="font-size:0.76rem;color:var(--text-dim)">${c.email} · הועבר לארכיון: ${c.archived_at ? new Date(c.archived_at).toLocaleDateString('he-IL') : ''}</div>
+              <div class="oil-row-name">${esc(c.name)}</div>
+              <div style="font-size:0.76rem;color:var(--text-dim)">${esc(c.email)} · הועבר לארכיון: ${c.archived_at ? new Date(c.archived_at).toLocaleDateString('he-IL') : ''}</div>
             </div>
             <button onclick="restoreClient('${c.id}')" class="btn-save" style="font-size:0.78rem;padding:8px 16px">העבר לפעיל</button>
           </div>
@@ -1343,7 +1352,7 @@
   /* ── BLEND BUILDER ── */
   function buildBlendRowHtml(oils) {
     const options = oils.map(o =>
-      `<option value="${o.id}" data-max="${o.quantity_ml}">${o.name} (${o.quantity_ml} מ"ל במלאי)</option>`
+      `<option value="${o.id}" data-max="${esc(o.quantity_ml)}">${esc(o.name)} (${esc(o.quantity_ml)} מ"ל במלאי)</option>`
     ).join('');
     return `
       <div class="blend-row" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
@@ -1407,16 +1416,16 @@
       <div class="oil-row" style="margin-bottom:14px;${item.quantity_ml <= 10 ? 'border-color:rgba(220,100,100,0.4);' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;">
           <div>
-            <div class="oil-row-name" style="margin-bottom:2px;">${item.name}</div>
+            <div class="oil-row-name" style="margin-bottom:2px;">${esc(item.name)}</div>
             ${item.purchase_date ? `<div style="font-size:0.74rem;color:var(--text-dim);">${new Date(item.purchase_date).toLocaleDateString('he-IL',{day:'numeric',month:'long',year:'numeric'})}</div>` : ''}
           </div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:${item.quantity_ml <= 10 ? '#E07070' : 'var(--gold)'};white-space:nowrap;margin-right:16px;">
-            ${item.quantity_ml <= 10 ? '⚠️ ' : ''}${item.quantity_ml} מ"ל
+            ${item.quantity_ml <= 10 ? '⚠️ ' : ''}${esc(item.quantity_ml)} מ"ל
           </div>
         </div>
         <div class="oil-row-details">
-          ${item.properties ? `<b>מאפיינים:</b> ${item.properties}<br>` : ''}
-          ${item.instructions ? `<b>הוראות:</b> ${item.instructions}` : ''}
+          ${item.properties ? `<b>מאפיינים:</b> ${esc(item.properties)}<br>` : ''}
+          ${item.instructions ? `<b>הוראות:</b> ${esc(item.instructions)}` : ''}
         </div>
       </div>
     `).join('');
@@ -1465,18 +1474,18 @@
     document.getElementById(`oil-row-${oilId}`).innerHTML = `
       <div class="form-group">
         <label>מטרה</label>
-        <input type="text" id="edit-purpose-${oilId}" value="${(oil.purpose || '').replace(/"/g,'&quot;')}"
+        <input type="text" id="edit-purpose-${oilId}" value="${esc(oil.purpose)}"
           style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;"/>
       </div>
       <div class="form-group">
         <label>רכיבים</label>
-        <input type="text" id="edit-ingredients-${oilId}" value="${(oil.ingredients || '').replace(/"/g,'&quot;')}"
+        <input type="text" id="edit-ingredients-${oilId}" value="${esc(oil.ingredients)}"
           style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;"/>
       </div>
       <div class="form-group">
         <label>הוראות שימוש</label>
         <textarea id="edit-instructions-${oilId}"
-          style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;min-height:64px;resize:vertical;">${oil.instructions || ''}</textarea>
+          style="width:100%;background:rgba(30,12,2,0.5);border:1px solid var(--border);border-radius:4px;padding:8px 10px;color:var(--text);font-family:Assistant,sans-serif;font-size:0.86rem;min-height:64px;resize:vertical;">${esc(oil.instructions)}</textarea>
       </div>
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button onclick="saveOilEdit('${oilId}')" class="btn-save" style="font-size:0.82rem;padding:8px 18px;">שמירה</button>
